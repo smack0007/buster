@@ -1,16 +1,25 @@
 #!/bin/bash
 set -eu
+
+buster_calculateHash() {
+  echo "$(sha1sum $1 | cut -d " " -f 1)"
+}
+
 BUSTER_PATH="$(dirname $(realpath "${BASH_SOURCE[0]}/.."))"
+BUSTER_BIN=${BUSTER_PATH}/bin
 BUSTER_DEPS=${BUSTER_PATH}/deps
+BUSTER_OUT=${BUSTER_BIN}/out
 BUSTER_SRC=${BUSTER_PATH}/src
 BUSTER_TMP=${BUSTER_PATH}/tmp
 BUSTER_PLATFORM="$(echo "$(uname -s)-$(uname -m)" | tr '[:upper:]' '[:lower:]')"
 BUSTER_NODE_VERSION=22.12.0
-BUSTER_ESBUILD_VERSION=0.24.0
-BUSTER_TYPESCRIPT_VERSION=5.7.2
-
 BUSTER_NODE_IDENTIFIER="node-v${BUSTER_NODE_VERSION}-${BUSTER_PLATFORM}"
 BUSTER_NODE_PATH="${BUSTER_DEPS}/${BUSTER_NODE_IDENTIFIER}/bin/node"
+BUSTER_NODE_IMPORT_FLAG="--import ${BUSTER_SRC}/loader.js"
+BUSTER_NODE_MODULES_HASH=$(buster_calculateHash "${BUSTER_PATH}/package.json")
+BUSTER_NODE_MODULES_IDENTIFIER="node_modules-${BUSTER_NODE_MODULES_HASH}"
+BUSTER_NODE_MODULES_PATH="${BUSTER_DEPS}/${BUSTER_NODE_MODULES_IDENTIFIER}"
+BUSTER_COMMAND=$1
 
 # Ensure deps and remove tmp if it exists
 mkdir -p ${BUSTER_DEPS}
@@ -30,20 +39,44 @@ if [ ! -d "${BUSTER_DEPS}/${BUSTER_NODE_IDENTIFIER}" ]; then
   rm -rf ${BUSTER_TMP}
 fi
 
-BUSTER_NODE_MODULES_HASH=$(${BUSTER_NODE_PATH} ${BUSTER_SRC}/hash.js "BUSTER_NODE_VERSION=${BUSTER_NODE_VERSION} BUSTER_ESBUILD_VERSION=${BUSTER_ESBUILD_VERSION} BUSTER_TYPESCRIPT_VERSION=${BUSTER_TYPESCRIPT_VERSION}")
-BUSTER_NODE_MODULES_IDENTIFIER="node_modules-${BUSTER_NODE_MODULES_HASH}"
-BUSTER_NODE_MODULES_PATH="${BUSTER_DEPS}/${BUSTER_NODE_MODULES_IDENTIFIER}"
-
 # Bootstrap node_modules
 if [ ! -d "${BUSTER_DEPS}/${BUSTER_NODE_MODULES_IDENTIFIER}" ]; then
   mkdir -p ${BUSTER_TMP}
-  pushd ${BUSTER_TMP} > /dev/null
-  ${BUSTER_DEPS}/${BUSTER_NODE_IDENTIFIER}/bin/npm i --quiet --prefix . esbuild@${BUSTER_ESBUILD_VERSION} typescript@${BUSTER_TYPESCRIPT_VERSION} > /dev/null
-  mv node_modules ${BUSTER_NODE_MODULES_PATH}
-  popd > /dev/null
+  cp ${BUSTER_PATH}/package.json ${BUSTER_TMP}
+  ${BUSTER_DEPS}/${BUSTER_NODE_IDENTIFIER}/bin/npm i --prefix ${BUSTER_TMP} > /dev/null
+  mv ${BUSTER_TMP}/node_modules ${BUSTER_NODE_MODULES_PATH}
   rm -rf ${BUSTER_TMP}
 fi
 
-BUSTER_NODE_MODULES_PATH=${BUSTER_NODE_MODULES_PATH} \
-  ${BUSTER_NODE_PATH} --import ${BUSTER_SRC}/loader.js $*
+# Compiles ts files from the src folder
+buster_compileSelf() {
+  mkdir -p ${BUSTER_OUT}
+  local hash="$(buster_calculateHash ${BUSTER_SRC}/$1)"
+  # local relativePath="${1:$(echo -n "${BUSTER_SRC}" | wc -c)}"
+  local fileNameWihtoutExtension="$(basename -s .ts $1)"
+  local outfile="${BUSTER_OUT}/${fileNameWihtoutExtension}-${hash}.ts"
+  
+  if [! -f ${outfile}]; then
+    ${BUSTER_NODE_MODULES_PATH}/.bin/esbuild ${BUSTER_SRC}/$1 --log-level=error --outfile=${BUSTER_OUT}/${fileNameWihtoutExtension}-${hash}.ts
+  fi
+  
+  echo "$outfile"
+}
+
+case $BUSTER_COMMAND in
+  "check")
+      ${BUSTER_NODE_MODULES_PATH}/.bin/tsc --typeRoots ${BUSTER_NODE_MODULES_PATH}/@types --noEmit ${@:2}
+    ;;
+
+  "run")
+      buster_compileSelf "loader.ts"
+      BUSTER_NODE_MODULES_PATH=${BUSTER_NODE_MODULES_PATH} \
+        ${BUSTER_NODE_PATH} ${BUSTER_NODE_IMPORT_FLAG} ${@:2}
+    ;;
+
+  *)
+    BUSTER_NODE_MODULES_PATH=${BUSTER_NODE_MODULES_PATH} \
+      ${BUSTER_NODE_PATH} ${BUSTER_NODE_IMPORT_FLAG} $*
+    ;;
+esac
 

@@ -1,4 +1,3 @@
-import { stat } from "node:fs/promises";
 import { join } from "node:path";
 import { exec } from "./os.js";
 
@@ -8,7 +7,7 @@ if (BUSTER_NODE_MODULES_PATH === undefined) {
   throw new Error("BUSTER_NODE_MODULES_PATH was not defined.");
 }
 
-const extensionsRegex = /\.(ts)$/;
+const extensionsRegex = /\.(ts|tsx)$/;
 
 export async function load(url, context, nextLoad) {
   if (extensionsRegex.test(url)) {
