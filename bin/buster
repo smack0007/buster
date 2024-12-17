@@ -5,13 +5,13 @@ buster_calculateHash() {
   echo "$(sha1sum $1 | cut -d " " -f 1)"
 }
 
-BUSTER_PATH="$(dirname $(realpath "${BASH_SOURCE[0]}/.."))"
+BUSTER_PATH="$(realpath $(dirname $(realpath "${BASH_SOURCE[0]}"))/..)"
 BUSTER_BIN=${BUSTER_PATH}/bin
 BUSTER_DEPS=${BUSTER_PATH}/deps
 BUSTER_OUT=${BUSTER_BIN}/out
 BUSTER_SRC=${BUSTER_PATH}/src
 BUSTER_TMP=${BUSTER_PATH}/tmp
-BUSTER_PLATFORM="$(echo "$(uname -s)-$(uname -m)" | tr '[:upper:]' '[:lower:]')"
+BUSTER_PLATFORM="$(echo "$(uname -s)-$(uname -m)" | tr '[:upper:]' '[:lower:]' | sed 's/x86_64/x64/')"
 BUSTER_NODE_VERSION=22.12.0
 BUSTER_NODE_IDENTIFIER="node-v${BUSTER_NODE_VERSION}-${BUSTER_PLATFORM}"
 BUSTER_NODE_PATH="${BUSTER_DEPS}/${BUSTER_NODE_IDENTIFIER}/bin/node"
@@ -31,13 +31,19 @@ fi
 if [ ! -d "${BUSTER_DEPS}/${BUSTER_NODE_IDENTIFIER}" ]; then
   mkdir -p ${BUSTER_TMP}
   pushd ${BUSTER_TMP} > /dev/null
-  wget -q https://nodejs.org/dist/v${BUSTER_NODE_VERSION}/${BUSTER_NODE_IDENTIFIER}.tar.gz
+  BUSTER_NODE_DOWNLOAD_URL=https://nodejs.org/dist/v${BUSTER_NODE_VERSION}/${BUSTER_NODE_IDENTIFIER}.tar.gz
+  if ! wget -q ${BUSTER_NODE_DOWNLOAD_URL}; then
+    echo "Failed to download ${BUSTER_NODE_DOWNLOAD_URL}"
+    exit
+  fi
   tar xzf ${BUSTER_NODE_IDENTIFIER}.tar.gz
   rm ${BUSTER_NODE_IDENTIFIER}.tar.gz
   mv ${BUSTER_NODE_IDENTIFIER} ${BUSTER_DEPS}
   popd > /dev/null
   rm -rf ${BUSTER_TMP}
 fi
+
+PATH="$(dirname ${BUSTER_NODE_PATH}):${PATH}"
 
 # Bootstrap node_modules
 if [ ! -d "${BUSTER_DEPS}/${BUSTER_NODE_MODULES_IDENTIFIER}" ]; then
@@ -56,7 +62,7 @@ buster_compileSelf() {
   local fileNameWihtoutExtension="$(basename -s .ts $1)"
   local outfile="${BUSTER_OUT}/${fileNameWihtoutExtension}-${hash}.ts"
   
-  if [! -f ${outfile}]; then
+  if [ ! -f "${outfile}" ]; then
     ${BUSTER_NODE_MODULES_PATH}/.bin/esbuild ${BUSTER_SRC}/$1 --log-level=error --outfile=${BUSTER_OUT}/${fileNameWihtoutExtension}-${hash}.ts
   fi
   
