@@ -1,27 +1,12 @@
-/*
- * @param {string} url
- * @param {object} context
- * @param {function} nextLoad
- * @returns {Promise}
- */
-export function load(path, context, nextLoad) {
-  if (!path.endsWith(".ts")) {
-    return nextLoad(path, context);
-  }
+import { register } from "node:module";
+import { join } from "node:path";
 
-  console.info(path);
-  process.exit(0);
+register("./register.js", import.meta.url);
 
-  return new Promise((resolve, reject) => {
-    fetch(path)
-      .then((res) => res.json())
-      .then((data) =>
-        resolve({
-          format: "json",
-          shortCircuit: true,
-          source: JSON.stringify(data),
-        })
-      )
-      .catch((err) => reject(err));
-  });
-}
+// const BUSTER_NODE_MODULES_PATH = process.env.BUSTER_NODE_MODULES_PATH;
+
+// if (BUSTER_NODE_MODULES_PATH === undefined) {
+//   throw new Error("BUSTER_NODE_MODULES_PATH was not defined.");
+// }
+
+// await import(join(BUSTER_NODE_MODULES_PATH, "tsx", "dist", "loader.mjs"));
