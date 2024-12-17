@@ -2,7 +2,7 @@
 set -eu
 
 buster_calculateHash() {
-  echo "$(sha1sum $1 | cut -d " " -f 1)"
+  echo "$(md5sum $1 | cut -d " " -f 1)"
 }
 
 BUSTER_PATH="$(realpath $(dirname $(realpath "${BASH_SOURCE[0]}"))/..)"
@@ -12,33 +12,36 @@ BUSTER_OUT=${BUSTER_BIN}/out
 BUSTER_SRC=${BUSTER_PATH}/src
 BUSTER_TMP=${BUSTER_PATH}/tmp
 BUSTER_PLATFORM="$(echo "$(uname -s)-$(uname -m)" | tr '[:upper:]' '[:lower:]' | sed 's/x86_64/x64/')"
-BUSTER_NODE_VERSION=22.12.0
-BUSTER_NODE_IDENTIFIER="node-v${BUSTER_NODE_VERSION}-${BUSTER_PLATFORM}"
-BUSTER_NODE_PATH="${BUSTER_DEPS}/${BUSTER_NODE_IDENTIFIER}/bin/node"
+BUSTER_NODE_VERSION=v22.12.0
+BUSTER_DEPS_IDENTIFIER="${BUSTER_NODE_VERSION}-${BUSTER_PLATFORM}"
+BUSTER_DEPS_PATH="${BUSTER_DEPS}/${BUSTER_DEPS_IDENTIFIER}"
+BUSTER_NODE_IDENTIFIER="node-${BUSTER_NODE_VERSION}-${BUSTER_PLATFORM}"
+BUSTER_NODE_BIN="${BUSTER_DEPS_PATH}/node/bin"
+BUSTER_NODE_PATH="${BUSTER_NODE_BIN}/node"
 BUSTER_NODE_IMPORT_FLAG="--import ${BUSTER_SRC}/loader.js"
-BUSTER_NODE_MODULES_HASH=$(buster_calculateHash "${BUSTER_PATH}/package.json")
-BUSTER_NODE_MODULES_IDENTIFIER="node_modules-${BUSTER_NODE_MODULES_HASH}"
-BUSTER_NODE_MODULES_PATH="${BUSTER_DEPS}/${BUSTER_NODE_MODULES_IDENTIFIER}"
+BUSTER_NODE_MODULES_IDENTIFIER=$(buster_calculateHash "${BUSTER_PATH}/package.json")
+BUSTER_NODE_MODULES_PATH="${BUSTER_DEPS_PATH}/${BUSTER_NODE_MODULES_IDENTIFIER}"
 BUSTER_COMMAND=$1
 
 # Ensure deps and remove tmp if it exists
-mkdir -p ${BUSTER_DEPS}
+mkdir -p ${BUSTER_DEPS_PATH}
 if [ -d "${BUSTER_TMP}" ]; then
   rm -rf ${BUSTER_TMP}
 fi
 
 # Bootstrap node
-if [ ! -d "${BUSTER_DEPS}/${BUSTER_NODE_IDENTIFIER}" ]; then
+if [ ! -f "${BUSTER_NODE_PATH}" ]; then
   mkdir -p ${BUSTER_TMP}
   pushd ${BUSTER_TMP} > /dev/null
-  BUSTER_NODE_DOWNLOAD_URL=https://nodejs.org/dist/v${BUSTER_NODE_VERSION}/${BUSTER_NODE_IDENTIFIER}.tar.gz
+  BUSTER_NODE_DOWNLOAD_URL=https://nodejs.org/dist/${BUSTER_NODE_VERSION}/${BUSTER_NODE_IDENTIFIER}.tar.gz
   if ! wget -q ${BUSTER_NODE_DOWNLOAD_URL}; then
     echo "Failed to download ${BUSTER_NODE_DOWNLOAD_URL}"
     exit
   fi
   tar xzf ${BUSTER_NODE_IDENTIFIER}.tar.gz
   rm ${BUSTER_NODE_IDENTIFIER}.tar.gz
-  mv ${BUSTER_NODE_IDENTIFIER} ${BUSTER_DEPS}
+  mv ${BUSTER_NODE_IDENTIFIER} node
+  mv node ${BUSTER_DEPS_PATH}
   popd > /dev/null
   rm -rf ${BUSTER_TMP}
 fi
@@ -46,10 +49,10 @@ fi
 PATH="$(dirname ${BUSTER_NODE_PATH}):${PATH}"
 
 # Bootstrap node_modules
-if [ ! -d "${BUSTER_DEPS}/${BUSTER_NODE_MODULES_IDENTIFIER}" ]; then
+if [ ! -d "${BUSTER_NODE_MODULES_PATH}" ]; then
   mkdir -p ${BUSTER_TMP}
   cp ${BUSTER_PATH}/package.json ${BUSTER_TMP}
-  ${BUSTER_DEPS}/${BUSTER_NODE_IDENTIFIER}/bin/npm i --prefix ${BUSTER_TMP} > /dev/null
+  ${BUSTER_NODE_BIN}/npm i --prefix ${BUSTER_TMP} > /dev/null
   mv ${BUSTER_TMP}/node_modules ${BUSTER_NODE_MODULES_PATH}
   rm -rf ${BUSTER_TMP}
 fi
@@ -75,7 +78,7 @@ case $BUSTER_COMMAND in
     ;;
 
   "run")
-      buster_compileSelf "loader.ts"
+      BUSTER_OUTFILE="$(buster_compileSelf "loader.ts")"
       BUSTER_NODE_MODULES_PATH=${BUSTER_NODE_MODULES_PATH} \
         ${BUSTER_NODE_PATH} ${BUSTER_NODE_IMPORT_FLAG} ${@:2}
     ;;
