@@ -18,6 +18,7 @@ BUSTER_DEPS_PATH="${BUSTER_DEPS}/${BUSTER_DEPS_IDENTIFIER}"
 BUSTER_NODE_IDENTIFIER="node-${BUSTER_NODE_VERSION}-${BUSTER_PLATFORM}"
 BUSTER_NODE_BIN="${BUSTER_DEPS_PATH}/node/bin"
 BUSTER_NODE_PATH="${BUSTER_NODE_BIN}/node"
+BUSTER_NODE_EXE="${BUSTER_NODE_PATH} --enable-source-maps"
 BUSTER_NODE_IMPORT_FLAG="--import ${BUSTER_SRC}/loader.js"
 BUSTER_NODE_MODULES_IDENTIFIER=$(buster_calculateHash "${BUSTER_PATH}/package.json")
 BUSTER_NODE_MODULES_PATH="${BUSTER_DEPS_PATH}/${BUSTER_NODE_MODULES_IDENTIFIER}"
@@ -76,13 +77,13 @@ buster_symlinkModules() {
   local symlinkModules="$(buster_compileSelf "symlinkModules.ts")"
   
   BUSTER_NODE_MODULES_PATH=${BUSTER_NODE_MODULES_PATH} \
-    ${BUSTER_NODE_PATH} $symlinkModules $@
+    ${BUSTER_NODE_EXE} $symlinkModules $@
 }
 
 buster_init() {
   local init="$(buster_compileSelf "init.ts")"
 
-  ${BUSTER_NODE_PATH} $init $@
+  ${BUSTER_NODE_EXE} $init $@
 
   buster_symlinkModules "$@"
 }
@@ -99,7 +100,7 @@ buster_run() {
   
   BUSTER_NODE_HOOKS_PATH=${hooksPath} \
   BUSTER_NODE_MODULES_PATH=${BUSTER_NODE_MODULES_PATH} \
-    ${BUSTER_NODE_PATH} ${importFlag} $@
+    ${BUSTER_NODE_EXE} ${importFlag} $@
 }
 
 case $BUSTER_COMMAND in

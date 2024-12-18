@@ -22,7 +22,7 @@ export async function load(
       format: "module",
     });
 
-    const result = await esbuild(source.toString());
+    const result = await esbuild(url, source.toString());
 
     if (result.code != 0) {
       throw new Error(
@@ -40,9 +40,15 @@ export async function load(
   return nextLoad(url, context);
 }
 
-async function esbuild(source: string): Promise<ExecResult> {
+async function esbuild(url: string, source: string): Promise<ExecResult> {
+  console.info(url);
   return await exec(
-    [join(BUSTER_NODE_MODULES_PATH, ".bin", "esbuild"), "--loader=ts"],
+    [
+      join(BUSTER_NODE_MODULES_PATH, ".bin", "esbuild"),
+      `--sourcefile=${url}`,
+      "--loader=ts",
+      "--sourcemap=inline",
+    ],
     {
       stdin: source,
     }
