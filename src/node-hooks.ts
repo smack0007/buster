@@ -1,6 +1,6 @@
 import { join } from "node:path";
-import { exec, ExecResult } from "./os.ts";
-import { throwError } from "./utils.ts";
+import { exec, ExecResult } from "./lib/os.ts";
+import { throwError } from "./lib/utils.ts";
 
 const BUSTER_NODE_MODULES_PATH =
   process.env.BUSTER_NODE_MODULES_PATH ??

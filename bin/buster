@@ -62,9 +62,8 @@ fi
 # Compiles ts files from the src folder
 buster_compileSelf() {
   local hash="$(buster_calculateHash ${BUSTER_SRC}/$1)"
-  # local relativePath="${1:$(echo -n "${BUSTER_SRC}" | wc -c)}"
   local fileNameWihtoutExtension="$(basename -s .ts $1)"
-  local outfile="${BUSTER_OUT_PATH}/${fileNameWihtoutExtension}.js"
+  local outfile="${BUSTER_OUT_PATH}/${fileNameWihtoutExtension}-${hash}.js"
   
   if [ ! -f "${outfile}" ]; then
     ${BUSTER_NODE_MODULES_PATH}/.bin/esbuild ${BUSTER_SRC}/$1 --log-level=error --format=esm --platform=node --bundle --outfile=${outfile}
@@ -73,18 +72,32 @@ buster_compileSelf() {
   echo "$outfile"
 }
 
+buster_init() {
+  local init="$(buster_compileSelf "init.ts")"
+
+  ${BUSTER_NODE_PATH} $init $@
+}
+
 buster_check() {
-  ${BUSTER_NODE_MODULES_PATH}/.bin/tsc --typeRoots ${BUSTER_NODE_MODULES_PATH}/@types --noEmit $@
+  local symlinkModules="$(buster_compileSelf "symlinkModules.ts")"
+  
+  BUSTER_NODE_MODULES_PATH=${BUSTER_NODE_MODULES_PATH} \
+    ${BUSTER_NODE_PATH} $symlinkModules $@
+  
+  ${BUSTER_NODE_MODULES_PATH}/.bin/tsc --noEmit $@
 }
 
 buster_run() {
-  local importFlag="--import $(buster_compileSelf "node-loader.ts")"
-  buster_compileSelf "node-hooks.ts" > /dev/null
+  local importFlag="--import $(buster_compileSelf "node-register.ts")"
+  local hooksPath="$(buster_compileSelf "node-hooks.ts")"
+  
+  BUSTER_NODE_HOOKS_PATH=${hooksPath} \
   BUSTER_NODE_MODULES_PATH=${BUSTER_NODE_MODULES_PATH} \
     ${BUSTER_NODE_PATH} ${importFlag} $@
 }
 
 case $BUSTER_COMMAND in
+  "init") buster_init ;;
   "check") buster_check "${@:2}" ;;
   "run") buster_run "${@:2}" ;;
   *) buster_run "$@" ;;

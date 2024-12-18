@@ -1,5 +1,11 @@
-import { mkdir, readdir, stat } from "node:fs/promises";
-import { assertError, isNodeError } from "./utils.ts";
+import {
+  mkdir,
+  readdir,
+  stat,
+  symlink as nodeSymlink,
+  writeFile,
+} from "node:fs/promises";
+import { assertError, isNodeError } from "../lib/utils.ts";
 
 export async function ensureDirectory(
   path: string,
@@ -28,4 +34,12 @@ export async function listDirectories(path: string): Promise<string[]> {
   return (await readdir(path, { withFileTypes: true }))
     .filter((entry) => entry.isDirectory())
     .map((entry) => entry.name);
+}
+
+export async function symlink(target: string, path: string): Promise<void> {
+  return await nodeSymlink(target, path);
+}
+
+export async function writeTextFile(path: string, data: string): Promise<void> {
+  await writeFile(path, data, { encoding: "utf-8" });
 }
