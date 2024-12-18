@@ -1,2 +1,2 @@
 - check only works when using "-p ./tsconfig.json". Check should just search for the nearest tsconfig.json.
-- init should write a package.json file if it does not exist.
+- help menu

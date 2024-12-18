@@ -41,7 +41,6 @@ export async function load(
 }
 
 async function esbuild(url: string, source: string): Promise<ExecResult> {
-  console.info(url);
   return await exec(
     [
       join(BUSTER_NODE_MODULES_PATH, ".bin", "esbuild"),
