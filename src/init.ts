@@ -7,6 +7,30 @@ const path = resolve(args[0] ?? process.cwd());
 
 console.info(`Initializing buster project at '${path}'...`);
 
+const projectName = path.split("/").reverse()[0];
+console.info(`Project name infered to be '${projectName}'.`);
+
+const packageJson = {
+  name: "",
+  description: "",
+  version: "0.0.1",
+  type: "module",
+};
+
+const packageJsonPath = join([path, "package.json"]);
+if (!(await exists(packageJsonPath))) {
+  console.info(`Writing '${packageJsonPath}'.`);
+
+  await writeTextFile(
+    packageJsonPath,
+    toJson({
+      ...packageJson,
+      name: projectName,
+    })
+  );
+} else {
+}
+
 const tsconfig = {
   compilerOptions: {
     noEmit: true,

@@ -66,23 +66,29 @@ buster_compileSelf() {
   local outfile="${BUSTER_OUT_PATH}/${fileNameWihtoutExtension}-${hash}.js"
   
   if [ ! -f "${outfile}" ]; then
-    ${BUSTER_NODE_MODULES_PATH}/.bin/esbuild ${BUSTER_SRC}/$1 --log-level=error --format=esm --platform=node --bundle --outfile=${outfile}
+    ${BUSTER_NODE_MODULES_PATH}/.bin/esbuild ${BUSTER_SRC}/$1 --log-level=error --format=esm --platform=node --bundle  --sourcemap=external --outfile=${outfile}
   fi
   
   echo "$outfile"
+}
+
+buster_symlinkModules() {
+  local symlinkModules="$(buster_compileSelf "symlinkModules.ts")"
+  
+  BUSTER_NODE_MODULES_PATH=${BUSTER_NODE_MODULES_PATH} \
+    ${BUSTER_NODE_PATH} $symlinkModules $@
 }
 
 buster_init() {
   local init="$(buster_compileSelf "init.ts")"
 
   ${BUSTER_NODE_PATH} $init $@
+
+  buster_symlinkModules "$@"
 }
 
 buster_check() {
-  local symlinkModules="$(buster_compileSelf "symlinkModules.ts")"
-  
-  BUSTER_NODE_MODULES_PATH=${BUSTER_NODE_MODULES_PATH} \
-    ${BUSTER_NODE_PATH} $symlinkModules $@
+  buster_symlinkModules "$@"
   
   ${BUSTER_NODE_MODULES_PATH}/.bin/tsc --noEmit $@
 }
@@ -97,8 +103,9 @@ buster_run() {
 }
 
 case $BUSTER_COMMAND in
-  "init") buster_init ;;
+  "init") buster_init "${@:2}" ;;
   "check") buster_check "${@:2}" ;;
+  "symlinkModules") buster_symlinkModules "${@:2}" ;;
   "run") buster_run "${@:2}" ;;
   *) buster_run "$@" ;;
 esac

@@ -56,3 +56,7 @@ export function exec(
     }
   });
 }
+
+export function exit(code?: number) {
+  process.exit(code);
+}
