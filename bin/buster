@@ -124,6 +124,10 @@ buster_run() {
     ${BUSTER_NODE_EXE} ${importFlag} $@
 }
 
+buster_test() {
+  buster_run "--test '**/*.test.ts' '**/*.spec.ts' $@"
+}
+
 if [ ! $BUSTER_COMMAND = "gc" ]; then
   buster_ensureNode
   buster_ensureNodeModules
@@ -134,8 +138,9 @@ case $BUSTER_COMMAND in
   "init") buster_init "${@:2}" ;;
   "gc") buster_gc "${@:2}" ;;
   "lint") buster_lint "${@:2}" ;;
-  "symlinkModules") buster_symlinkModules "${@:2}" ;;
   "run") buster_run "${@:2}" ;;
+  "symlinkModules") buster_symlinkModules "${@:2}" ;;
+  "test") buster_test "${@:2}" ;;
   *)
     if [ ! "$@" = "" ]; then
       buster_run "$@"
