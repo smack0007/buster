@@ -1,15 +1,21 @@
 import { join } from "node:path";
-import { exec } from "./os.js";
+import { exec, ExecResult } from "./os.ts";
+import { throwError } from "./utils.ts";
 
-const BUSTER_NODE_MODULES_PATH = process.env.BUSTER_NODE_MODULES_PATH;
-
-if (BUSTER_NODE_MODULES_PATH === undefined) {
-  throw new Error("BUSTER_NODE_MODULES_PATH was not defined.");
-}
+const BUSTER_NODE_MODULES_PATH =
+  process.env.BUSTER_NODE_MODULES_PATH ??
+  throwError("BUSTER_NODE_MODULES_PATH was not defined.");
 
 const extensionsRegex = /\.(ts|tsx)$/;
 
-export async function load(url, context, nextLoad) {
+export async function load(
+  url: string,
+  context: Record<string, unknown>,
+  nextLoad: (
+    url: string,
+    context: Record<string, unknown>
+  ) => Promise<{ source: string }>
+) {
   if (extensionsRegex.test(url)) {
     const { source } = await nextLoad(url, {
       ...context,
@@ -31,10 +37,10 @@ export async function load(url, context, nextLoad) {
     };
   }
 
-  return nextLoad(url);
+  return nextLoad(url, context);
 }
 
-async function esbuild(source) {
+async function esbuild(source: string): Promise<ExecResult> {
   return await exec(
     [join(BUSTER_NODE_MODULES_PATH, ".bin", "esbuild"), "--loader=ts"],
     {

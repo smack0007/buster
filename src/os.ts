@@ -1,6 +1,19 @@
 import { spawn } from "node:child_process";
 
-export function exec(args, options) {
+export interface ExecOptions {
+  stdin?: string;
+}
+
+export interface ExecResult {
+  code: number;
+  stdout: string;
+  stderr: string;
+}
+
+export function exec(
+  args: string[],
+  options: ExecOptions = {}
+): Promise<ExecResult> {
   return new Promise((resolve, reject) => {
     try {
       const process = spawn(args[0], args.slice(1), {
@@ -17,7 +30,7 @@ export function exec(args, options) {
         stderr += data.toString();
       });
 
-      function onCloseOrExit(code) {
+      function onCloseOrExit(code: number) {
         resolve({
           code,
           stdout,
@@ -33,7 +46,10 @@ export function exec(args, options) {
         reject(err);
       });
 
-      process.stdin.write(options.stdin);
+      if (options.stdin) {
+        process.stdin.write(options.stdin);
+      }
+
       process.stdin.end();
     } catch (err) {
       reject(err);

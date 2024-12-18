@@ -1,0 +1,4 @@
+{
+  // Use .ts extensions in imports
+  "typescript.preferences.importModuleSpecifierEnding": "js"
+}

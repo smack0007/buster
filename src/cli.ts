@@ -1,19 +1,18 @@
 import { basename, dirname, join, resolve } from "node:path";
-import { ensureDirectory, exists, listDirectories } from "./fs.js";
 import { symlink } from "node:fs/promises";
+import { ensureDirectory, exists, listDirectories } from "./fs.ts";
+import { throwError } from "./utils.ts";
 
-const { BUSTER_NODE_MODULES_PATH } = process.env;
-
-if (BUSTER_NODE_MODULES_PATH === undefined) {
-  throw new Error("BUSTER_NODE_MODULES_PATH is undefined.");
-}
+const BUSTER_NODE_MODULES_PATH =
+  process.env.BUSTER_NODE_MODULES_PATH ??
+  throwError("BUSTER_NODE_MODULES_PATH is undefined.");
 
 const args = process.argv.slice(2);
 const scriptPath = args[0];
 const scriptDirectory = resolve(dirname(scriptPath));
 const scriptFile = basename(scriptPath);
 
-async function findPackageJson(directory) {
+async function findPackageJson(directory: string): Promise<string | null> {
   const packageJsonPath = join(directory, "package.json");
   if (await exists(packageJsonPath)) {
     return packageJsonPath;

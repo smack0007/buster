@@ -8,7 +8,7 @@ buster_calculateHash() {
 BUSTER_PATH="$(realpath $(dirname $(realpath "${BASH_SOURCE[0]}"))/..)"
 BUSTER_BIN=${BUSTER_PATH}/bin
 BUSTER_DEPS=${BUSTER_PATH}/deps
-BUSTER_OUT=${BUSTER_BIN}/out
+BUSTER_OUT=${BUSTER_PATH}/out
 BUSTER_SRC=${BUSTER_PATH}/src
 BUSTER_TMP=${BUSTER_PATH}/tmp
 BUSTER_PLATFORM="$(echo "$(uname -s)-$(uname -m)" | tr '[:upper:]' '[:lower:]' | sed 's/x86_64/x64/')"
@@ -21,10 +21,12 @@ BUSTER_NODE_PATH="${BUSTER_NODE_BIN}/node"
 BUSTER_NODE_IMPORT_FLAG="--import ${BUSTER_SRC}/loader.js"
 BUSTER_NODE_MODULES_IDENTIFIER=$(buster_calculateHash "${BUSTER_PATH}/package.json")
 BUSTER_NODE_MODULES_PATH="${BUSTER_DEPS_PATH}/${BUSTER_NODE_MODULES_IDENTIFIER}"
+BUSTER_OUT_PATH="${BUSTER_OUT}/${BUSTER_DEPS_IDENTIFIER}-${BUSTER_NODE_MODULES_IDENTIFIER}"
 BUSTER_COMMAND=$1
 
-# Ensure deps and remove tmp if it exists
+# Ensure deps/out and remove tmp if it exists
 mkdir -p ${BUSTER_DEPS_PATH}
+mkdir -p ${BUSTER_OUT_PATH}
 if [ -d "${BUSTER_TMP}" ]; then
   rm -rf ${BUSTER_TMP}
 fi
@@ -59,33 +61,32 @@ fi
 
 # Compiles ts files from the src folder
 buster_compileSelf() {
-  mkdir -p ${BUSTER_OUT}
   local hash="$(buster_calculateHash ${BUSTER_SRC}/$1)"
   # local relativePath="${1:$(echo -n "${BUSTER_SRC}" | wc -c)}"
   local fileNameWihtoutExtension="$(basename -s .ts $1)"
-  local outfile="${BUSTER_OUT}/${fileNameWihtoutExtension}-${hash}.ts"
+  local outfile="${BUSTER_OUT_PATH}/${fileNameWihtoutExtension}.js"
   
   if [ ! -f "${outfile}" ]; then
-    ${BUSTER_NODE_MODULES_PATH}/.bin/esbuild ${BUSTER_SRC}/$1 --log-level=error --outfile=${BUSTER_OUT}/${fileNameWihtoutExtension}-${hash}.ts
+    ${BUSTER_NODE_MODULES_PATH}/.bin/esbuild ${BUSTER_SRC}/$1 --log-level=error --format=esm --platform=node --bundle --outfile=${outfile}
   fi
   
   echo "$outfile"
 }
 
+buster_check() {
+  ${BUSTER_NODE_MODULES_PATH}/.bin/tsc --typeRoots ${BUSTER_NODE_MODULES_PATH}/@types --noEmit $@
+}
+
+buster_run() {
+  local importFlag="--import $(buster_compileSelf "node-loader.ts")"
+  buster_compileSelf "node-hooks.ts" > /dev/null
+  BUSTER_NODE_MODULES_PATH=${BUSTER_NODE_MODULES_PATH} \
+    ${BUSTER_NODE_PATH} ${importFlag} $@
+}
+
 case $BUSTER_COMMAND in
-  "check")
-      ${BUSTER_NODE_MODULES_PATH}/.bin/tsc --typeRoots ${BUSTER_NODE_MODULES_PATH}/@types --noEmit ${@:2}
-    ;;
-
-  "run")
-      BUSTER_OUTFILE="$(buster_compileSelf "loader.ts")"
-      BUSTER_NODE_MODULES_PATH=${BUSTER_NODE_MODULES_PATH} \
-        ${BUSTER_NODE_PATH} ${BUSTER_NODE_IMPORT_FLAG} ${@:2}
-    ;;
-
-  *)
-    BUSTER_NODE_MODULES_PATH=${BUSTER_NODE_MODULES_PATH} \
-      ${BUSTER_NODE_PATH} ${BUSTER_NODE_IMPORT_FLAG} $*
-    ;;
+  "check") buster_check "${@:2}" ;;
+  "run") buster_run "${@:2}" ;;
+  *) buster_run "$@" ;;
 esac
 

@@ -5,7 +5,9 @@
     "moduleResolution": "nodenext",
     "strict": true,
     "checkJs": true,
-    "noEmit": true
+    "noEmit": true,
+
+    "allowImportingTsExtensions": true
   },
-  "include": ["src/*.js"]
+  "include": ["src/**/*.ts"]
 }
