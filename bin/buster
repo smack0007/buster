@@ -12,6 +12,7 @@ BUSTER_OUT=${BUSTER_PATH}/out
 BUSTER_SRC=${BUSTER_PATH}/src
 BUSTER_TMP=${BUSTER_PATH}/tmp
 BUSTER_PLATFORM="$(echo "$(uname -s)-$(uname -m)" | tr '[:upper:]' '[:lower:]' | sed 's/x86_64/x64/')"
+BUSTER_VERSION="$(cat package.json | grep "version" | cut -d ":" -f 2 | tr -d '", ')"
 BUSTER_NODE_VERSION=v22.12.0
 BUSTER_DEPS_IDENTIFIER="${BUSTER_NODE_VERSION}-${BUSTER_PLATFORM}"
 BUSTER_DEPS_PATH="${BUSTER_DEPS}/${BUSTER_DEPS_IDENTIFIER}"
@@ -23,7 +24,7 @@ BUSTER_NODE_IMPORT_FLAG="--import ${BUSTER_SRC}/loader.js"
 BUSTER_NODE_MODULES_IDENTIFIER=$(buster_calculateHash "${BUSTER_PATH}/package.json")
 BUSTER_NODE_MODULES_PATH="${BUSTER_DEPS_PATH}/${BUSTER_NODE_MODULES_IDENTIFIER}"
 BUSTER_OUT_PATH="${BUSTER_OUT}/${BUSTER_DEPS_IDENTIFIER}-${BUSTER_NODE_MODULES_IDENTIFIER}"
-BUSTER_COMMAND=$1
+BUSTER_COMMAND=${1:-}
 
 PATH="$(dirname ${BUSTER_NODE_PATH}):${PATH}"
 
@@ -118,7 +119,7 @@ buster_run() {
     ${BUSTER_NODE_EXE} ${importFlag} $@
 }
 
-if [ $BUSTER_COMMAND != "gc" ]; then
+if [ ! $BUSTER_COMMAND = "gc" ]; then
   buster_ensureNode
   buster_ensureNodeModules
 fi
@@ -129,6 +130,12 @@ case $BUSTER_COMMAND in
   "gc") buster_gc "${@:2}" ;;
   "symlinkModules") buster_symlinkModules "${@:2}" ;;
   "run") buster_run "${@:2}" ;;
-  *) buster_run "$@" ;;
+  *)
+    if [ ! "$@" = "" ]; then
+      buster_run "$@"
+    else
+      echo "Buster ${BUSTER_VERSION} (pew pew pew)"
+    fi
+    ;;
 esac
 
