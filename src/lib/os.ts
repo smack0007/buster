@@ -30,7 +30,7 @@ export function exec(
         stderr += data.toString();
       });
 
-      function onCloseOrExit(code: number) {
+      function onCloseOrExit(code: number): void {
         resolve({
           code,
           stdout,
@@ -57,6 +57,6 @@ export function exec(
   });
 }
 
-export function exit(code?: number) {
+export function exit(code?: number): never {
   process.exit(code);
 }

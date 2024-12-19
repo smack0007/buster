@@ -52,6 +52,20 @@ if (!(await exists(tsconfigPath))) {
 } else {
 }
 
+const oxlintrc = {
+  plugins: ["typescript"],
+  rules: {
+    "@typescript-eslint/explicit-function-return-type": "error",
+  },
+};
+
+const oxlintrcPath = join([path, ".oxlintrc.json"]);
+if (!(await exists(oxlintrcPath))) {
+  console.info(`Writing '${oxlintrcPath}'.`);
+  await writeTextFile(oxlintrcPath, toJson(oxlintrc));
+} else {
+}
+
 const vscodeSettings = {
   "typescript.preferences.importModuleSpecifierEnding": "js",
 };
@@ -67,6 +81,28 @@ if (!(await exists(vscodeSettingsPath))) {
 const vscodeTasks = {
   version: "2.0.0",
   tasks: [
+    {
+      label: "Lint",
+      group: {
+        kind: "none",
+        isDefault: false,
+      },
+      presentation: {
+        echo: true,
+        reveal: "always",
+        focus: false,
+        panel: "shared",
+        showReuseMessage: false,
+        clear: true,
+      },
+      type: "process",
+      command: "buster",
+      args: ["lint"],
+      options: {
+        cwd: "${workspaceFolder}",
+      },
+      problemMatcher: ["$tsc"],
+    },
     {
       label: "Run",
       group: {

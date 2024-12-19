@@ -15,7 +15,7 @@ export async function load(
     url: string,
     context: Record<string, unknown>
   ) => Promise<{ source: string }>
-) {
+): Promise<{ source: string; format?: "module"; shortCircuit?: true }> {
   if (extensionsRegex.test(url)) {
     const { source } = await nextLoad(url, {
       ...context,
