@@ -1,22 +1,13 @@
 import { ensureDirectory, exists, symlink } from "./lib/fs.ts";
 import { findPackageJson, throwError } from "./lib/utils.ts";
 import { dirname, join, resolve } from "./lib/path.ts";
-import { exit } from "./lib/os.ts";
-import { red } from "./lib/colors.ts";
 
 const BUSTER_NODE_MODULES_PATH =
   process.env.BUSTER_NODE_MODULES_PATH ??
   throwError("BUSTER_NODE_MODULES_PATH is undefined.");
 
 const args = process.argv.slice(2);
-const scriptPath = args[0];
-
-if (scriptPath === undefined) {
-  console.error(red("ERROR: No script path provided in symlinkModules.ts"));
-  exit(1);
-}
-
-const scriptDirectory = resolve(dirname(scriptPath));
+const scriptDirectory = resolve(args[0] ?? process.cwd());
 
 const packageJson = await findPackageJson(scriptDirectory);
 const nodeModulesPath = join([

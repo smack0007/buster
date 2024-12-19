@@ -63,3 +63,49 @@ if (!(await exists(vscodeSettingsPath))) {
   await writeTextFile(vscodeSettingsPath, toJson(vscodeSettings));
 } else {
 }
+
+const vscodeTasks = {
+  version: "2.0.0",
+  tasks: [
+    {
+      label: "Run",
+      group: {
+        kind: "none",
+        isDefault: true,
+      },
+      presentation: {
+        echo: true,
+        reveal: "always",
+        focus: false,
+        panel: "shared",
+        showReuseMessage: false,
+        clear: true,
+      },
+      type: "process",
+      command: "buster",
+      args: ["run", "./src/main.ts"],
+      options: {
+        cwd: "${workspaceFolder}",
+      },
+      problemMatcher: ["$tsc"],
+    },
+  ],
+};
+
+const vscodeTasksPath = join([path, ".vscode", "tasks.json"]);
+if (!(await exists(vscodeTasksPath))) {
+  console.info(`Writing '${vscodeTasksPath}'.`);
+  await ensureDirectory(join([path, ".vscode"]));
+  await writeTextFile(vscodeTasksPath, toJson(vscodeTasks));
+} else {
+}
+
+const mainSourceFile = `console.info("Hello World!");`;
+
+const mainSourceFilePath = join([path, "src", "main.ts"]);
+if (!(await exists(mainSourceFilePath))) {
+  console.info(`Writing '${mainSourceFilePath}'.`);
+  await ensureDirectory(join([path, "src"]));
+  await writeTextFile(mainSourceFilePath, mainSourceFile);
+} else {
+}
