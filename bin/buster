@@ -6,7 +6,6 @@ buster_calculateHash() {
 }
 
 BUSTER_PATH="$(realpath $(dirname $(realpath "${BASH_SOURCE[0]}"))/..)"
-BUSTER_BIN=${BUSTER_PATH}/bin
 BUSTER_DEPS=${BUSTER_PATH}/deps
 BUSTER_OUT=${BUSTER_PATH}/out
 BUSTER_SRC=${BUSTER_PATH}/src
@@ -16,11 +15,8 @@ BUSTER_VERSION="$(cat ${BUSTER_PATH}/package.json | grep "version" | cut -d ":" 
 BUSTER_NODE_VERSION=v22.12.0
 BUSTER_DEPS_IDENTIFIER="${BUSTER_NODE_VERSION}-${BUSTER_PLATFORM}"
 BUSTER_DEPS_PATH="${BUSTER_DEPS}/${BUSTER_DEPS_IDENTIFIER}"
-BUSTER_NODE_IDENTIFIER="node-${BUSTER_NODE_VERSION}-${BUSTER_PLATFORM}"
-BUSTER_NODE_BIN="${BUSTER_DEPS_PATH}/node/bin"
-BUSTER_NODE_PATH="${BUSTER_NODE_BIN}/node"
+BUSTER_NODE_PATH="${BUSTER_DEPS_PATH}/node/bin/node"
 BUSTER_NODE_EXE="${BUSTER_NODE_PATH} --enable-source-maps"
-BUSTER_NODE_IMPORT_FLAG="--import ${BUSTER_SRC}/loader.js"
 BUSTER_NODE_MODULES_IDENTIFIER=$(buster_calculateHash "${BUSTER_PATH}/package.json")
 BUSTER_NODE_MODULES_PATH="${BUSTER_DEPS_PATH}/${BUSTER_NODE_MODULES_IDENTIFIER}"
 BUSTER_OUT_PATH="${BUSTER_OUT}/${BUSTER_DEPS_IDENTIFIER}-${BUSTER_NODE_MODULES_IDENTIFIER}"
@@ -37,17 +33,18 @@ if [ -d "${BUSTER_TMP}" ]; then
 fi
 
 buster_ensureNode() {
+  local nodeIdentifier="node-${BUSTER_NODE_VERSION}-${BUSTER_PLATFORM}"
   if [ ! -f "${BUSTER_NODE_PATH}" ]; then
     mkdir -p ${BUSTER_TMP}
     pushd ${BUSTER_TMP} > /dev/null
-    BUSTER_NODE_DOWNLOAD_URL=https://nodejs.org/dist/${BUSTER_NODE_VERSION}/${BUSTER_NODE_IDENTIFIER}.tar.gz
+    BUSTER_NODE_DOWNLOAD_URL=https://nodejs.org/dist/${BUSTER_NODE_VERSION}/${nodeIdentifier}.tar.gz
     if ! wget -q ${BUSTER_NODE_DOWNLOAD_URL}; then
       echo "Failed to download ${BUSTER_NODE_DOWNLOAD_URL}"
       exit
     fi
-    tar xzf ${BUSTER_NODE_IDENTIFIER}.tar.gz
-    rm ${BUSTER_NODE_IDENTIFIER}.tar.gz
-    mv ${BUSTER_NODE_IDENTIFIER} node
+    tar xzf ${nodeIdentifier}.tar.gz
+    rm ${nodeIdentifier}.tar.gz
+    mv ${nodeIdentifier} node
     mv node ${BUSTER_DEPS_PATH}
     popd > /dev/null
     rm -rf ${BUSTER_TMP}
@@ -58,7 +55,7 @@ buster_ensureNodeModules() {
   if [ ! -d "${BUSTER_NODE_MODULES_PATH}" ]; then
     mkdir -p ${BUSTER_TMP}
     cp ${BUSTER_PATH}/package.json ${BUSTER_TMP}
-    ${BUSTER_NODE_BIN}/npm i --prefix ${BUSTER_TMP} > /dev/null
+    ${BUSTER_DEPS_PATH}/node/bin/npm i --prefix ${BUSTER_TMP} > /dev/null
     mv ${BUSTER_TMP}/node_modules ${BUSTER_NODE_MODULES_PATH}
     rm -rf ${BUSTER_TMP}
   fi
