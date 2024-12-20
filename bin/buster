@@ -7,6 +7,7 @@ buster_calculateHash() {
 
 BUSTER_PATH="$(realpath $(dirname $(realpath "${BASH_SOURCE[0]}"))/..)"
 BUSTER_DEPS=${BUSTER_PATH}/deps
+BUSTER_DIST=${BUSTER_PATH}/dist
 BUSTER_OUT=${BUSTER_PATH}/out
 BUSTER_SRC=${BUSTER_PATH}/src
 BUSTER_TMP=${BUSTER_PATH}/tmp
@@ -22,6 +23,11 @@ BUSTER_NODE_MODULES_PATH="${BUSTER_DEPS_PATH}/${BUSTER_NODE_MODULES_IDENTIFIER}"
 BUSTER_OUT_PATH="${BUSTER_OUT}/${BUSTER_DEPS_IDENTIFIER}-${BUSTER_NODE_MODULES_IDENTIFIER}"
 BUSTER_OXLINT_EXE="${BUSTER_NODE_MODULES_PATH}/@oxlint/$(echo "${BUSTER_PLATFORM}" | sed 's/linux-x64/linux-x64-gnu/')/oxlint"
 BUSTER_COMMAND=${1:-}
+BUSTER_IS_RELEASE=${BUSTER_IS_RELEASE:-0}
+
+if [ ! -d "${BUSTER_SRC}" ]; then
+  BUSTER_IS_RELEASE=1
+fi
 
 PATH="$(dirname ${BUSTER_NODE_PATH}):${PATH}"
 
@@ -68,10 +74,23 @@ buster_compileSelf() {
   local outfile="${BUSTER_OUT_PATH}/${fileNameWihtoutExtension}-${hash}.js"
   
   if [ ! -f "${outfile}" ]; then
-    ${BUSTER_NODE_MODULES_PATH}/.bin/esbuild ${BUSTER_SRC}/$1 --log-level=error --format=esm --platform=node --bundle  --sourcemap=external --outfile=${outfile}
+    ${BUSTER_NODE_MODULES_PATH}/.bin/esbuild ${BUSTER_SRC}/$1 --log-level=error --format=esm --platform=node --bundle --sourcemap=external --outfile=${outfile}
   fi
   
   echo "$outfile"
+}
+
+buster_invoke() {  
+  local fileNameWihtoutExtension="$(basename -s .ts $1)"
+  local distFilePath="${BUSTER_DIST}/${fileNameWihtoutExtension}.js"
+  
+  if [ ! "${BUSTER_IS_RELEASE}" = "1" ]; then
+    mkdir -p ${BUSTER_DIST}
+    ${BUSTER_NODE_MODULES_PATH}/.bin/esbuild "${BUSTER_SRC}/$1" --log-level=error --format=esm --platform=node --bundle --sourcemap=inline --outfile="${distFilePath}"
+  fi
+
+  BUSTER_NODE_MODULES_PATH=${BUSTER_NODE_MODULES_PATH} \
+    ${BUSTER_NODE_EXE} ${distFilePath} ${@:2}
 }
 
 buster_symlinkModules() {
@@ -79,6 +98,10 @@ buster_symlinkModules() {
   
   BUSTER_NODE_MODULES_PATH=${BUSTER_NODE_MODULES_PATH} \
     ${BUSTER_NODE_EXE} $symlinkModules $@
+}
+
+buster_bundle() {
+  buster_invoke "bundle.ts" "$@" 
 }
 
 buster_check() {
@@ -122,7 +145,7 @@ buster_run() {
 }
 
 buster_test() {
-  buster_run "--test '**/*.test.ts' '**/*.spec.ts' $@"
+  buster_run "--test **/*.test.ts **/*.spec.ts $@"
 }
 
 if [ ! $BUSTER_COMMAND = "gc" ]; then
@@ -131,6 +154,7 @@ if [ ! $BUSTER_COMMAND = "gc" ]; then
 fi
 
 case $BUSTER_COMMAND in
+  "bundle") buster_bundle "${@:2}" ;;
   "check") buster_check "${@:2}" ;;
   "init") buster_init "${@:2}" ;;
   "gc") buster_gc "${@:2}" ;;
