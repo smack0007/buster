@@ -2,6 +2,7 @@ import { ensureDirectory, exists, symlink } from "./lib/fs.ts";
 import { findPackageJson, throwError } from "./lib/utils.ts";
 import { dirname, join, resolve } from "./lib/path.ts";
 import { getNodeModulesPath } from "./lib/common.ts";
+import { red } from "./lib/colors.ts";
 
 const NODE_MODULES_PATH = getNodeModulesPath();
 
@@ -14,10 +15,15 @@ const nodeModulesPath = join([packageJson ? dirname(packageJson) : scriptDirecto
 await ensureDirectory(nodeModulesPath);
 await ensureDirectory(join([nodeModulesPath, "@types"]));
 
-if (!(await exists(join([nodeModulesPath, "@types", "node"])))) {
-  await symlink(join([NODE_MODULES_PATH, "@types", "node"]), join([nodeModulesPath, "@types", "node"]));
+async function trySymlink(target: string, path: string): Promise<void> {
+  if (!(await exists(path))) {
+    try {
+      await symlink(target, path);
+    } catch (err) {
+      console.error(red(`Failed to create symlink "${path}" => "${target}".`));
+    }
+  }
 }
 
-if (!(await exists(join([nodeModulesPath, "undici-types"])))) {
-  await symlink(join([NODE_MODULES_PATH, "undici-types"]), join([nodeModulesPath, "undici-types"]));
-}
+trySymlink(join([NODE_MODULES_PATH, "@types", "node"]), join([nodeModulesPath, "@types", "node"]));
+trySymlink(join([NODE_MODULES_PATH, "undici-types"]), join([nodeModulesPath, "undici-types"]));

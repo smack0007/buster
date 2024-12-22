@@ -10,6 +10,18 @@ console.info(`Initializing buster project at '${path}'...`);
 const projectName = path.split("/").reverse()[0];
 console.info(`Project name infered to be '${projectName}'.`);
 
+const gitIgnore = `
+node_modules/
+tmp/
+`.trimStart();
+
+const gitIgnorePath = join([path, ".gitignore"]);
+if (!(await exists(gitIgnorePath))) {
+  console.info(`Writing '${gitIgnorePath}'.`);
+  await writeTextFile(gitIgnorePath, gitIgnore);
+} else {
+}
+
 const packageJson = {
   name: "",
   description: "",
@@ -26,7 +38,7 @@ if (!(await exists(packageJsonPath))) {
     toJson({
       ...packageJson,
       name: projectName,
-    })
+    }),
   );
 } else {
 }

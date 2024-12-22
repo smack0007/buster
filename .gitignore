@@ -2,5 +2,7 @@ dist/
 deps/
 node_modules/
 out/
+plat/
 tmp/
+node_modules.version
 package-lock.json

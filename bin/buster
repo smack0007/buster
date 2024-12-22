@@ -6,21 +6,18 @@ buster_calculateHash() {
 }
 
 BUSTER_PATH="$(realpath $(dirname $(realpath "${BASH_SOURCE[0]}"))/..)"
-BUSTER_DEPS=${BUSTER_PATH}/deps
 BUSTER_DIST=${BUSTER_PATH}/dist
-BUSTER_OUT=${BUSTER_PATH}/out
+BUSTER_PLAT=${BUSTER_PATH}/plat
 BUSTER_SRC=${BUSTER_PATH}/src
 BUSTER_TMP=${BUSTER_PATH}/tmp
 BUSTER_PLATFORM="$(echo "$(uname -s)-$(uname -m)" | tr '[:upper:]' '[:lower:]' | sed 's/x86_64/x64/')"
 BUSTER_VERSION="$(cat ${BUSTER_PATH}/package.json | grep "version" | cut -d ":" -f 2 | tr -d '", ')"
 BUSTER_NODE_VERSION=v22.12.0
-BUSTER_DEPS_IDENTIFIER="${BUSTER_NODE_VERSION}-${BUSTER_PLATFORM}"
-BUSTER_DEPS_PATH="${BUSTER_DEPS}/${BUSTER_DEPS_IDENTIFIER}"
-BUSTER_NODE_PATH="${BUSTER_DEPS_PATH}/node/bin/node"
-BUSTER_NODE_EXE="${BUSTER_NODE_PATH} --enable-source-maps"
+BUSTER_NODE_IDENTIFIER="node-${BUSTER_NODE_VERSION}-${BUSTER_PLATFORM}"
+BUSTER_NODE_PATH="${BUSTER_PLAT}/${BUSTER_NODE_IDENTIFIER}"
+BUSTER_NODE_EXE="${BUSTER_NODE_PATH}/bin/node --enable-source-maps"
 BUSTER_NODE_MODULES_IDENTIFIER=$(buster_calculateHash "${BUSTER_PATH}/package.json")
-BUSTER_NODE_MODULES_PATH="${BUSTER_DEPS_PATH}/${BUSTER_NODE_MODULES_IDENTIFIER}"
-BUSTER_OUT_PATH="${BUSTER_OUT}/${BUSTER_DEPS_IDENTIFIER}-${BUSTER_NODE_MODULES_IDENTIFIER}"
+BUSTER_NODE_MODULES_PATH="${BUSTER_PATH}/node_modules"
 BUSTER_OXLINT_EXE="${BUSTER_NODE_MODULES_PATH}/@oxlint/$(echo "${BUSTER_PLATFORM}" | sed 's/linux-x64/linux-x64-gnu/')/oxlint"
 BUSTER_COMMAND=${1:-}
 BUSTER_IS_RELEASE=${BUSTER_IS_RELEASE:-0}
@@ -29,75 +26,62 @@ if [ ! -d "${BUSTER_SRC}" ]; then
   BUSTER_IS_RELEASE=1
 fi
 
-PATH="$(dirname ${BUSTER_NODE_PATH}):${PATH}"
+PATH="${BUSTER_NODE_PATH}/bin:${PATH}"
 
-# Ensure deps/out and remove tmp if it exists
-mkdir -p ${BUSTER_DEPS_PATH}
-mkdir -p ${BUSTER_OUT_PATH}
+# Ensure plat and remove tmp if it exists
+mkdir -p ${BUSTER_PLAT}
 if [ -d "${BUSTER_TMP}" ]; then
   rm -rf ${BUSTER_TMP}
 fi
 
 buster_ensureNode() {
-  local nodeIdentifier="node-${BUSTER_NODE_VERSION}-${BUSTER_PLATFORM}"
-  if [ ! -f "${BUSTER_NODE_PATH}" ]; then
+  if [ ! -d "${BUSTER_NODE_PATH}" ]; then
     mkdir -p ${BUSTER_TMP}
     pushd ${BUSTER_TMP} > /dev/null
-    BUSTER_NODE_DOWNLOAD_URL=https://nodejs.org/dist/${BUSTER_NODE_VERSION}/${nodeIdentifier}.tar.gz
+    BUSTER_NODE_DOWNLOAD_URL=https://nodejs.org/dist/${BUSTER_NODE_VERSION}/${BUSTER_NODE_IDENTIFIER}.tar.gz
     if ! wget -q ${BUSTER_NODE_DOWNLOAD_URL}; then
       echo "Failed to download ${BUSTER_NODE_DOWNLOAD_URL}"
       exit
     fi
-    tar xzf ${nodeIdentifier}.tar.gz
-    rm ${nodeIdentifier}.tar.gz
-    mv ${nodeIdentifier} node
-    mv node ${BUSTER_DEPS_PATH}
+    tar xzf ${BUSTER_NODE_IDENTIFIER}.tar.gz
+    rm ${BUSTER_NODE_IDENTIFIER}.tar.gz
+    mv ${BUSTER_NODE_IDENTIFIER} node
+    mv node ${BUSTER_NODE_PATH}
     popd > /dev/null
     rm -rf ${BUSTER_TMP}
   fi
 }
 
 buster_ensureNodeModules() {
-  if [ ! -d "${BUSTER_NODE_MODULES_PATH}" ]; then
-    mkdir -p ${BUSTER_TMP}
-    cp ${BUSTER_PATH}/package.json ${BUSTER_TMP}
-    ${BUSTER_DEPS_PATH}/node/bin/npm i --prefix ${BUSTER_TMP} > /dev/null
-    mv ${BUSTER_TMP}/node_modules ${BUSTER_NODE_MODULES_PATH}
-    rm -rf ${BUSTER_TMP}
+  if [ ! -d "${BUSTER_NODE_MODULES_PATH}" ] || [ ! "$(cat ${BUSTER_PATH}/node_modules.version)" == "${BUSTER_NODE_MODULES_IDENTIFIER}" ]; then
+    # TODO: Would be nice if it would only output on error situations
+    ${BUSTER_NODE_PATH}/bin/npm i > /dev/null
+    echo "${BUSTER_NODE_MODULES_IDENTIFIER}" > ${BUSTER_PATH}/node_modules.version
   fi
 }
 
 # Compiles ts files from the src folder
 buster_compileSelf() {
-  local hash="$(buster_calculateHash ${BUSTER_SRC}/$1)"
-  local fileNameWihtoutExtension="$(basename -s .ts $1)"
-  local outfile="${BUSTER_OUT_PATH}/${fileNameWihtoutExtension}-${hash}.js"
-  
-  if [ ! -f "${outfile}" ]; then
-    ${BUSTER_NODE_MODULES_PATH}/.bin/esbuild ${BUSTER_SRC}/$1 --log-level=error --format=esm --platform=node --bundle --sourcemap=external --outfile=${outfile}
-  fi
-  
-  echo "$outfile"
-}
-
-buster_invoke() {  
   local fileNameWihtoutExtension="$(basename -s .ts $1)"
   local distFilePath="${BUSTER_DIST}/${fileNameWihtoutExtension}.js"
   
   if [ ! "${BUSTER_IS_RELEASE}" = "1" ]; then
     mkdir -p ${BUSTER_DIST}
-    ${BUSTER_NODE_MODULES_PATH}/.bin/esbuild "${BUSTER_SRC}/$1" --log-level=error --format=esm --platform=node --bundle --sourcemap=inline --outfile="${distFilePath}"
+    ${BUSTER_NODE_MODULES_PATH}/.bin/esbuild ${BUSTER_SRC}/$1 --log-level=error --format=esm --platform=node --bundle --sourcemap=external --outfile=${distFilePath}
   fi
+  
+  echo "$distFilePath"
+}
+
+buster_invoke() {  
+  local distFilePath="$(buster_compileSelf $1)"
 
   BUSTER_NODE_MODULES_PATH=${BUSTER_NODE_MODULES_PATH} \
     ${BUSTER_NODE_EXE} ${distFilePath} ${@:2}
 }
 
 buster_symlinkModules() {
-  local symlinkModules="$(buster_compileSelf "symlinkModules.ts")"
-  
-  BUSTER_NODE_MODULES_PATH=${BUSTER_NODE_MODULES_PATH} \
-    ${BUSTER_NODE_EXE} $symlinkModules $@
+  buster_invoke "symlinkModules.ts" "$@"
 }
 
 buster_bundle() {
@@ -111,10 +95,7 @@ buster_check() {
 }
 
 buster_init() {
-  local init="$(buster_compileSelf "init.ts")"
-
-  ${BUSTER_NODE_EXE} $init $@
-
+  buster_invoke "init.ts" "$@"
   buster_symlinkModules "$@"
 }
 
@@ -122,11 +103,11 @@ buster_gc() {
   local command="${1:-}"
 
   case $command in
-    "deps") rm -rf ${BUSTER_DEPS} ;;
     "out") rm -rf ${BUSTER_OUT} ;;
+    "plat") rm -rf ${BUSTER_PLAT} ;;
     *)
       rm -rf ${BUSTER_DEPS}
-      rm -rf ${BUSTER_OUT}
+      rm -rf ${BUSTER_PLAT}
       ;;
   esac
 }
