@@ -55,7 +55,7 @@ buster_ensureNode() {
 buster_ensureNodeModules() {
   if [ ! -d "${BUSTER_NODE_MODULES_PATH}" ] || [ ! "$(cat ${BUSTER_PATH}/node_modules.version)" == "${BUSTER_NODE_MODULES_IDENTIFIER}" ]; then
     # TODO: Would be nice if it would only output on error situations
-    ${BUSTER_NODE_PATH}/bin/npm i > /dev/null
+    ${BUSTER_NODE_PATH}/bin/npm i --prefix ${BUSTER_PATH} > /dev/null
     echo "${BUSTER_NODE_MODULES_IDENTIFIER}" > ${BUSTER_PATH}/node_modules.version
   fi
 }
