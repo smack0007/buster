@@ -1,5 +1,5 @@
 import { ensureDirectory, exists, symlink } from "./lib/fs.ts";
-import { findPackageJson, throwError } from "./lib/utils.ts";
+import { findPackageJson } from "./lib/utils.ts";
 import { dirname, join, resolve } from "./lib/path.ts";
 import { getNodeModulesPath } from "./lib/common.ts";
 import { red } from "./lib/colors.ts";

@@ -27,6 +27,7 @@ const packageJson = {
   description: "",
   version: "0.0.1",
   type: "module",
+  main: "./src/main.ts",
 };
 
 const packageJsonPath = join([path, "package.json"]);
