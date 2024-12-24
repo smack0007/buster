@@ -7,14 +7,14 @@ buster_calculateHash() {
 
 BUSTER_PATH="$(realpath $(dirname $(realpath "${BASH_SOURCE[0]}"))/..)"
 BUSTER_DIST=${BUSTER_PATH}/dist
-BUSTER_PLAT=${BUSTER_PATH}/plat
+BUSTER_RT=${BUSTER_PATH}/rt
 BUSTER_SRC=${BUSTER_PATH}/src
 BUSTER_TMP=${BUSTER_PATH}/tmp
 BUSTER_PLATFORM="$(echo "$(uname -s)-$(uname -m)" | tr '[:upper:]' '[:lower:]' | sed 's/x86_64/x64/')"
 BUSTER_VERSION="$(cat ${BUSTER_PATH}/package.json | grep "version" | cut -d ":" -f 2 | tr -d '", ')"
 BUSTER_NODE_VERSION=v22.12.0
 BUSTER_NODE_IDENTIFIER="node-${BUSTER_NODE_VERSION}-${BUSTER_PLATFORM}"
-BUSTER_NODE_PATH="${BUSTER_PLAT}/${BUSTER_NODE_IDENTIFIER}"
+BUSTER_NODE_PATH="${BUSTER_RT}/${BUSTER_NODE_IDENTIFIER}"
 BUSTER_NODE_EXE="${BUSTER_NODE_PATH}/bin/node --enable-source-maps"
 BUSTER_NODE_MODULES_IDENTIFIER=$(buster_calculateHash "${BUSTER_PATH}/package.json")
 BUSTER_NODE_MODULES_PATH="${BUSTER_PATH}/node_modules"
@@ -29,7 +29,7 @@ fi
 PATH="${BUSTER_NODE_PATH}/bin:${PATH}"
 
 # Ensure plat and remove tmp if it exists
-mkdir -p ${BUSTER_PLAT}
+mkdir -p ${BUSTER_RT}
 if [ -d "${BUSTER_TMP}" ]; then
   rm -rf ${BUSTER_TMP}
 fi
@@ -104,10 +104,10 @@ buster_gc() {
 
   case $command in
     "out") rm -rf ${BUSTER_OUT} ;;
-    "plat") rm -rf ${BUSTER_PLAT} ;;
+    "plat") rm -rf ${BUSTER_RT} ;;
     *)
       rm -rf ${BUSTER_DEPS}
-      rm -rf ${BUSTER_PLAT}
+      rm -rf ${BUSTER_RT}
       ;;
   esac
 }
