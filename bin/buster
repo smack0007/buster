@@ -12,23 +12,33 @@ BUSTER_SRC=${BUSTER_PATH}/src
 BUSTER_TMP=${BUSTER_PATH}/tmp
 BUSTER_PLATFORM="$(echo "$(uname -s)-$(uname -m)" | tr '[:upper:]' '[:lower:]' | sed 's/x86_64/x64/')"
 BUSTER_VERSION="$(cat ${BUSTER_PATH}/package.json | grep "version" | cut -d ":" -f 2 | tr -d '", ')"
-BUSTER_NODE_VERSION=v22.12.0
-BUSTER_NODE_IDENTIFIER="node-${BUSTER_NODE_VERSION}-${BUSTER_PLATFORM}"
-BUSTER_NODE_PATH="${BUSTER_RT}/${BUSTER_NODE_IDENTIFIER}"
+BUSTER_COMMAND=${1:-}
+
+if command -v node > /dev/null; then
+  BUSTER_NODE_PATH="$(realpath $(dirname $(command -v node))/..)"
+  BUSTER_NODE_VERSION="$(node --version)"
+  BUSTER_NODE_IDENTIFIER="node-${BUSTER_NODE_VERSION}-${BUSTER_PLATFORM}"
+else
+  BUSTER_NODE_VERSION=v22.12.0
+  BUSTER_NODE_IDENTIFIER="node-${BUSTER_NODE_VERSION}-${BUSTER_PLATFORM}"
+  BUSTER_NODE_PATH="${BUSTER_RT}/${BUSTER_NODE_IDENTIFIER}"
+
+  # If we're handling node ourselves then add it to the path.
+  PATH="${BUSTER_NODE_PATH}/bin:${PATH}"
+fi
+
 BUSTER_NODE_EXE="${BUSTER_NODE_PATH}/bin/node --enable-source-maps"
-BUSTER_NODE_MODULES_IDENTIFIER=$(buster_calculateHash "${BUSTER_PATH}/package.json")
+
+BUSTER_NODE_MODULES_IDENTIFIER="${BUSTER_NODE_IDENTIFIER}-$(buster_calculateHash "${BUSTER_PATH}/package.json")"
 BUSTER_NODE_MODULES_PATH="${BUSTER_PATH}/node_modules"
 BUSTER_OXLINT_EXE="${BUSTER_NODE_MODULES_PATH}/@oxlint/$(echo "${BUSTER_PLATFORM}" | sed 's/linux-x64/linux-x64-gnu/')/oxlint"
-BUSTER_COMMAND=${1:-}
-BUSTER_IS_RELEASE=${BUSTER_IS_RELEASE:-0}
 
+BUSTER_IS_RELEASE=${BUSTER_IS_RELEASE:-0}
 if [ ! -d "${BUSTER_SRC}" ]; then
   BUSTER_IS_RELEASE=1
 fi
 
-PATH="${BUSTER_NODE_PATH}/bin:${PATH}"
-
-# Ensure plat and remove tmp if it exists
+# Ensure rt and remove tmp if it exists
 mkdir -p ${BUSTER_RT}
 if [ -d "${BUSTER_TMP}" ]; then
   rm -rf ${BUSTER_TMP}
@@ -101,10 +111,8 @@ buster_gc() {
   local command="${1:-}"
 
   case $command in
-    "out") rm -rf ${BUSTER_OUT} ;;
-    "plat") rm -rf ${BUSTER_RT} ;;
+    "rt") rm -rf ${BUSTER_RT} ;;
     *)
-      rm -rf ${BUSTER_DEPS}
       rm -rf ${BUSTER_RT}
       ;;
   esac
