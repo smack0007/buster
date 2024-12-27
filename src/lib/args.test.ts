@@ -2,7 +2,7 @@ import { describe, it } from "node:test";
 import { deepStrictEqual } from "assert";
 import { parseArgs, ParseArgsConfig } from "./args.ts";
 
-const FOO_BAR_CONFIG: ParseArgsConfig = {
+const FOO_BAR_CONFIG: ParseArgsConfig<"foo" | "bar"> = {
   foo: {
     keys: ["--foo", "-f"],
     type: "string",

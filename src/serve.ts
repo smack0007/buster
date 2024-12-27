@@ -59,6 +59,6 @@ const server = createServer(async (req: IncomingMessage, res: ServerResponse<Inc
   }
 });
 
-server.listen(args.port, args.host as number, () => {
+server.listen(args.port, args.host, () => {
   console.log(`Server is running on http://${args.host}:${args.port}`);
 });
