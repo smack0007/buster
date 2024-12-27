@@ -13,4 +13,4 @@ jobs:
         with:
           node-version: 22.12.0
       - name: Run Tests
-        run: ./test.sh
+        run: TERM=xterm ./test.sh
