@@ -29,6 +29,14 @@ export async function isDirectory(path: string): Promise<boolean> {
   return false;
 }
 
+export async function isFile(path: string): Promise<boolean> {
+  try {
+    return (await stat(path)).isFile();
+  } catch {}
+
+  return false;
+}
+
 export async function listDirectories(path: string): Promise<string[]> {
   return (await readdir(path, { withFileTypes: true }))
     .filter((entry) => entry.isDirectory())

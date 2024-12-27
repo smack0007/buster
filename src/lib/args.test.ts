@@ -6,16 +6,23 @@ const FOO_BAR_CONFIG: ParseArgsConfig = {
   foo: {
     keys: ["--foo", "-f"],
     type: "string",
+    default: "foo",
   },
   bar: {
     keys: ["--bar", "-b"],
     type: "number",
+    default: 42,
   },
 };
 
 describe("parseArgs", () => {
-  it("should work", () => {
-    const args = ["--foo", "abc", "-b", "42"];
+  it("basic test", () => {
+    const args: string[] = ["--foo", "abc", "-b", "42"];
     deepStrictEqual(parseArgs(args, FOO_BAR_CONFIG), { _: [], foo: "abc", bar: 42 });
+  });
+
+  it("default args", () => {
+    const args: string[] = [];
+    deepStrictEqual(parseArgs(args, FOO_BAR_CONFIG), { _: [], foo: "foo", bar: 42 });
   });
 });

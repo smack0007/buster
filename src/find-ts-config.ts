@@ -1,23 +1,19 @@
 import { parseArgs } from "./lib/args.ts";
 import { red } from "./lib/colors.ts";
+import { logError } from "./lib/log.ts";
 import { exit } from "./lib/os.ts";
 import { resolve } from "./lib/path.ts";
 import { findTSConfig } from "./lib/utils.ts";
 
-const args = parseArgs(process.argv.slice(2), {
-  output: {
-    keys: ["--output", "-o"],
-    type: "string",
-  },
-});
+const args = parseArgs(process.argv.slice(2), {});
 
 if (args._.length === 0) {
-  console.error(red("Please provide a directory from which to start the search."));
+  logError("Please provide a directory from which to start the search.");
   exit(1);
 }
 
 if (args._.length > 1) {
-  console.error(red("Only one directory should be provided."));
+  logError("Only one directory should be provided.");
   exit(1);
 }
 

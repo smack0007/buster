@@ -51,5 +51,11 @@ export function parseArgs<TConfig extends ParseArgsConfig>(args: string[], confi
     }
   }
 
+  for (const configKey of Object.keys(config)) {
+    if (values[configKey] === undefined && config[configKey].default !== undefined) {
+      (values[configKey] as unknown) = config[configKey].default;
+    }
+  }
+
   return values as ParseArgsResult<TConfig>;
 }
