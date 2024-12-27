@@ -1,16 +1,7 @@
-import {
-  mkdir,
-  readdir,
-  stat,
-  symlink as nodeSymlink,
-  writeFile,
-} from "node:fs/promises";
+import { mkdir, readdir, readFile, stat, symlink as nodeSymlink, writeFile } from "node:fs/promises";
 import { assertError, isNodeError } from "../lib/utils.ts";
 
-export async function ensureDirectory(
-  path: string,
-  options?: Parameters<typeof mkdir>[1]
-): Promise<void> {
+export async function ensureDirectory(path: string, options?: Parameters<typeof mkdir>[1]): Promise<void> {
   try {
     await mkdir(path, options);
   } catch (err) {
@@ -30,10 +21,22 @@ export async function exists(path: string): Promise<boolean> {
   return false;
 }
 
+export async function isDirectory(path: string): Promise<boolean> {
+  try {
+    return (await stat(path)).isDirectory();
+  } catch {}
+
+  return false;
+}
+
 export async function listDirectories(path: string): Promise<string[]> {
   return (await readdir(path, { withFileTypes: true }))
     .filter((entry) => entry.isDirectory())
     .map((entry) => entry.name);
+}
+
+export async function readTextFile(path: string): Promise<string> {
+  return await readFile(path, { encoding: "utf-8" });
 }
 
 export async function symlink(target: string, path: string): Promise<void> {

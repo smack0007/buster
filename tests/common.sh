@@ -10,8 +10,9 @@ BUSTER_RESET=`tput sgr0`
 
 BUSTER_ERROR_PREFIX="${BUSTER_RED}error${BUSTER_RESET}: "
 
+# All tests should produce the TMP directory if needed
 if [ -d "${BUSTER_TMP}" ]; then
-  rm -rf ${BUSTER_TMP}
+  rm -rf "${BUSTER_TMP}"
 fi
 
 buster_logAssertFailed() {
@@ -39,5 +40,14 @@ buster_expect_error() {
   
   if [ ! "${expected}" == "" ]; then
     buster_expect_equal "${actual:${#BUSTER_ERROR_PREFIX}}" "$expected"
+  fi
+}
+
+buster_expect_file() {
+  local expectedFile="${2}"
+
+  if [ ! -f "${expectedFile}" ]; then
+    buster_logAssertFailed "expected file '${expectedFile}' to exist"
+    exit 1
   fi
 }

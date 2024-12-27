@@ -1,5 +1,6 @@
-import { exists } from "./fs.ts";
+import { exists, readTextFile } from "./fs.ts";
 import { dirname, join } from "./path.ts";
+import { PackageJson } from "./types.ts";
 
 export function assertError(error: unknown): asserts error is Error {
   if (!(error instanceof Error)) {
@@ -35,6 +36,10 @@ export async function findTSConfig(directory: string): Promise<string | null> {
 
 export function isNodeError(error: Error): error is Error & { code: string } {
   return typeof (error as unknown as { code: string }).code === "string";
+}
+
+export async function loadPackageJson(path: string): Promise<PackageJson> {
+  return JSON.parse(await readTextFile(path));
 }
 
 export function throwError(message?: string): never {

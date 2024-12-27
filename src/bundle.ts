@@ -1,8 +1,10 @@
 import { parseArgs } from "./lib/args.ts";
 import { getNodeModulesPath } from "./lib/common.ts";
-import { red } from "./lib/colors.ts";
 import { exec, exit } from "./lib/os.ts";
-import { join, resolve } from "./lib/path.ts";
+import { dirname, join, resolve } from "./lib/path.ts";
+import { isDirectory } from "./lib/fs.ts";
+import { logError } from "./lib/log.ts";
+import { findPackageJson, loadPackageJson } from "./lib/utils.ts";
 
 const NODE_MODULES_PATH = getNodeModulesPath();
 
@@ -14,22 +16,40 @@ const args = parseArgs(process.argv.slice(2), {
 });
 
 if (args._.length === 0) {
-  console.error(red("Please provide an input file."));
+  logError("Please provide an input file.");
   exit(1);
 }
 
 if (args._.length > 1) {
-  console.error(red("Multiple input files currently not supported."));
+  logError("Multiple input files currently not supported.");
   exit(1);
 }
 
 if (args.output === undefined) {
-  console.error(red("Please provide an output path via --output (-o)."));
+  logError("Please provide an output path via --output (-o).");
   exit(1);
 }
 
-const inputFile = resolve(args._[0]);
+let inputFile = resolve(args._[0]);
 const outputFile = resolve(args.output as string);
+
+if (await isDirectory(inputFile)) {
+  const packageJsonPath = await findPackageJson(inputFile);
+
+  if (packageJsonPath === null) {
+    logError("A directory was provided as the input and no package.json could be found.");
+    exit(1);
+  }
+
+  const packageJson = await loadPackageJson(packageJsonPath);
+
+  if (!packageJson.main) {
+    logError("A directory was provided as the input and main is not set in the package.json.");
+    exit(1);
+  }
+
+  inputFile = join([dirname(packageJsonPath), packageJson.main]);
+}
 
 await exec([
   join([NODE_MODULES_PATH, ".bin", "esbuild"]),

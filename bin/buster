@@ -49,7 +49,7 @@ fi
 # Ensure rt and remove tmp if it exists
 mkdir -p ${BUSTER_RT}
 if [ -d "${BUSTER_TMP}" ]; then
-  rm -rf ${BUSTER_TMP}
+  rm -rf "${BUSTER_TMP}"
 fi
 
 buster_ensureNode() {
@@ -66,7 +66,7 @@ buster_ensureNode() {
     mv ${BUSTER_NODE_IDENTIFIER} node
     mv node ${BUSTER_NODE_PATH}
     popd > /dev/null
-    rm -rf ${BUSTER_TMP}
+    rm -rf "${BUSTER_TMP}"
   fi
 }
 
@@ -135,9 +135,9 @@ buster_gc() {
   local command="${1:-}"
 
   case $command in
-    "rt") rm -rf ${BUSTER_RT} ;;
+    "rt") rm -rf "${BUSTER_RT}" ;;
     *)
-      rm -rf ${BUSTER_RT}
+      rm -rf "${BUSTER_RT}"
       ;;
   esac
 }
