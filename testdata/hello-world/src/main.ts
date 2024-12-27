@@ -1,1 +1,3 @@
-console.info("Hello World!");
+import { sayHello } from "./sayHello.ts";
+
+console.info(sayHello("World"));

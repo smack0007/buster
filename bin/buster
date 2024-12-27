@@ -5,6 +5,14 @@ buster_calculateHash() {
   echo "$(md5sum $1 | cut -d " " -f 1)"
 }
 
+BUSTER_GREEN=`tput setaf 2`
+BUSTER_RED=`tput setaf 1`
+BUSTER_RESET=`tput sgr0`
+
+buster_logError() {
+  echo -e "${BUSTER_RED}error${BUSTER_RESET}: ${1}"
+}
+
 BUSTER_PATH="$(realpath $(dirname $(realpath "${BASH_SOURCE[0]}"))/..)"
 BUSTER_DIST=${BUSTER_PATH}/dist
 BUSTER_RT=${BUSTER_PATH}/rt
@@ -98,8 +106,24 @@ buster_bundle() {
   buster_invoke "bundle.ts" "$@" 
 }
 
-buster_check() {  
-  ${BUSTER_NODE_MODULES_PATH}/.bin/tsc --noEmit $@
+buster_check() {
+  if [ "${1:-}" = "" ]; then
+    if [ -f "tsconfig.json" ]; then 
+      ${BUSTER_NODE_MODULES_PATH}/.bin/tsc --noEmit -p "tsconfig.json"
+    else
+      buster_logError "The current directory does not contain a 'tsconfig.json' file. Not sure what to check."
+    fi
+  elif [ -d "${1:-}" ]; then
+    if [ -f "${1}/tsconfig.json" ]; then 
+      ${BUSTER_NODE_MODULES_PATH}/.bin/tsc --noEmit -p "${1}/tsconfig.json" ${@:2}
+    else
+      buster_logError "'${1}' is a directory and '${1}/tsconfig.json' does not exist. Not sure what to check."
+    fi
+  elif [ -f "${1:-}" ]; then
+    buster_logError "'${1}' is a file and check expects the directory of your project to be provided."
+  else
+    buster_logError "Unknown error."
+  fi
 }
 
 buster_init() {

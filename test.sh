@@ -1,8 +1,10 @@
 #!/bin/bash
 BUSTER_PATH="$(dirname $(realpath "${BASH_SOURCE[0]}"))"
+
+echo "=== Unit Tests ==="
 ${BUSTER_PATH}/bin/buster test .
 
-echo # Insert newline
+echo "=== Integration Tests ==="
 BUSTER_TESTS_RESULT=0
 
 pushd ${BUSTER_PATH}/tests > /dev/null

@@ -7,9 +7,7 @@ export function assertError(error: unknown): asserts error is Error {
   }
 }
 
-export async function findPackageJson(
-  directory: string
-): Promise<string | null> {
+export async function findPackageJson(directory: string): Promise<string | null> {
   const packageJsonPath = join([directory, "package.json"]);
   if (await exists(packageJsonPath)) {
     return packageJsonPath;
@@ -20,6 +18,19 @@ export async function findPackageJson(
   }
 
   return await findPackageJson(dirname(directory));
+}
+
+export async function findTSConfig(directory: string): Promise<string | null> {
+  const tsConfigPath = join([directory, "tsconfig.json"]);
+  if (await exists(tsConfigPath)) {
+    return tsConfigPath;
+  }
+
+  if (directory === "/") {
+    return null;
+  }
+
+  return await findTSConfig(dirname(directory));
 }
 
 export function isNodeError(error: Error): error is Error & { code: string } {
