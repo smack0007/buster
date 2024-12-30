@@ -5,7 +5,9 @@ BUSTER_COMMAND="${1:-}"
 
 if [[ "${BUSTER_COMMAND}" = "" || "${BUSTER_COMMAND}" = "unit" ]]; then
   echo "=== Unit Tests ==="
-  ${BUSTER_PATH}/bin/buster test ${2:-.}
+  pushd ${BUSTER_PATH} > /dev/null
+  ${BUSTER_PATH}/bin/buster test "${2:-*}"
+  popd > /dev/null
 fi
 
 if [[ "${BUSTER_COMMAND}" = "" || "${BUSTER_COMMAND}" = "int" ]]; then

@@ -164,7 +164,7 @@ buster_serve() {
 }
 
 buster_test() {
-  local name=${1:-*}
+  local name="${1:-*}"
   buster_run "--test **/$name.test.ts **/$name.spec.ts ${@:2}"
 }
 
