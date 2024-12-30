@@ -2,7 +2,7 @@ import { ensureDirectory, exists, symlink } from "./lib/fs.ts";
 import { findPackageJson } from "./lib/utils.ts";
 import { dirname, join, resolve } from "./lib/path.ts";
 import { getNodeModulesPath } from "./lib/common.ts";
-import { red } from "./lib/colors.ts";
+import { logError } from "./lib/log.ts";
 
 const NODE_MODULES_PATH = getNodeModulesPath();
 
@@ -20,7 +20,7 @@ async function trySymlink(target: string, path: string): Promise<void> {
     try {
       await symlink(target, path);
     } catch (err) {
-      console.error(red(`Failed to create symlink "${path}" => "${target}".`));
+      logError(`Failed to create symlink "${path}" => "${target}".\n${err}`);
     }
   }
 }

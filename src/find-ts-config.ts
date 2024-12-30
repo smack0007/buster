@@ -1,5 +1,4 @@
 import { parseArgs } from "./lib/args.ts";
-import { red } from "./lib/colors.ts";
 import { logError } from "./lib/log.ts";
 import { exit } from "./lib/os.ts";
 import { resolve } from "./lib/path.ts";

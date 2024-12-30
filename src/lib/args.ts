@@ -1,5 +1,3 @@
-import { RecordKeys } from "./types.ts";
-
 export type ParseArgsType = "number" | "string";
 
 type ParseArgsTypeMap<T extends ParseArgsType> = T extends "number" ? number : string;
