@@ -164,12 +164,16 @@ buster_serve() {
 }
 
 buster_test() {
-  buster_run "--test **/*.test.ts **/*.spec.ts $@"
+  local name=${1:-*}
+  buster_run "--test **/$name.test.ts **/$name.spec.ts ${@:2}"
 }
 
 if [ ! $BUSTER_COMMAND = "gc" ]; then
   buster_ensureNode
   buster_ensureNodeModules
+
+  # buster calls back to itself sometimes so ensure it's on the PATH
+  PATH="${BUSTER_PATH}/bin:${PATH}"
 fi
 
 case $BUSTER_COMMAND in
