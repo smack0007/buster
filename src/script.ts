@@ -3,6 +3,10 @@ import { logError } from "./lib/log.ts";
 import { exec, ExecIOMode, exit } from "./lib/os.ts";
 import { findPackageJson, loadPackageJson } from "./lib/utils.ts";
 
+function escapeShellArg(arg: string): string {
+  return `'${arg.replace(/'/g, `'\\''`)}'`;
+}
+
 const args = parseArgs(process.argv.slice(2), {});
 
 if (args._.length === 0) {
@@ -27,7 +31,13 @@ if (!packageJson.scripts || packageJson.scripts[scriptName] === undefined) {
   exit(1);
 }
 
-await exec(["/bin/bash", "-c", packageJson.scripts[scriptName]], {
+let command = packageJson.scripts[scriptName];
+
+if (scriptArgs.length) {
+  command += " " + scriptArgs.map(escapeShellArg).join(" ");
+}
+
+await exec(["/bin/bash", "-c", command], {
   stdout: ExecIOMode.inherit,
   stderr: ExecIOMode.inherit,
 });

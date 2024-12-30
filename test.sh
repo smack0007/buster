@@ -15,7 +15,7 @@ if [[ "${BUSTER_COMMAND}" = "" || "${BUSTER_COMMAND}" = "int" ]]; then
   BUSTER_TESTS_RESULT=0
 
   pushd ${BUSTER_PATH}/tests > /dev/null
-  for directory in */ ; do
+  for directory in ${2:-*}/ ; do
     pushd $directory > /dev/null
     echo $directory
     for file in *.sh ; do

@@ -5,6 +5,7 @@
   "type": "module",
   "main": "./src/main.ts",
   "scripts": {
+    "run": "buster run ./src/main.ts",
     "run:bob": "buster run ./src/main.ts Bob"
   }
 }

@@ -35,6 +35,10 @@ export async function findTSConfig(directory: string): Promise<string | null> {
   return await findTSConfig(dirname(directory));
 }
 
+export function isObject(obj: unknown): obj is {} {
+  return typeof obj === "object" && obj !== null && !Array.isArray(obj);
+}
+
 export function isNodeError(error: Error): error is Error & { code: string } {
   return typeof (error as unknown as { code: string }).code === "string";
 }

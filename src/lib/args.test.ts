@@ -1,6 +1,5 @@
-import { describe, it } from "node:test";
-import { deepStrictEqual } from "assert";
 import { parseArgs, ParseArgsConfig } from "./args.ts";
+import { describe, expect, it } from "./test.ts";
 
 const FOO_BAR_CONFIG: ParseArgsConfig<"foo" | "bar"> = {
   foo: {
@@ -19,12 +18,12 @@ describe("args.ts", () => {
   describe("parseArgs", () => {
     it("basic test", () => {
       const args: string[] = ["--foo", "abc", "-b", "42"];
-      deepStrictEqual(parseArgs(args, FOO_BAR_CONFIG), { _: [], foo: "abc", bar: 42 });
+      expect(parseArgs(args, FOO_BAR_CONFIG)).toEqual({ _: [], foo: "abc", bar: 42 });
     });
 
     it("default args", () => {
       const args: string[] = [];
-      deepStrictEqual(parseArgs(args, FOO_BAR_CONFIG), { _: [], foo: "foo", bar: 42 });
+      expect(parseArgs(args, FOO_BAR_CONFIG)).toEqual({ _: [], foo: "foo", bar: 42 });
     });
   });
 });
