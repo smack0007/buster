@@ -7,6 +7,9 @@ if [[ "${BUSTER_COMMAND}" = "" || "${BUSTER_COMMAND}" = "unit" ]]; then
   echo "=== Unit Tests ==="
   pushd ${BUSTER_PATH} > /dev/null
   ${BUSTER_PATH}/bin/buster test "${2:-*}"
+  if [ ! "$?" = "0" ]; then
+    exit 1
+  fi
   popd > /dev/null
 fi
 
