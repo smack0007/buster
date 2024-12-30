@@ -155,6 +155,10 @@ buster_run() {
     ${BUSTER_NODE_EXE} ${importFlag} $@
 }
 
+buster_script() {
+  buster_invoke "script.ts" "$@" 
+}
+
 buster_serve() {
   buster_invoke "serve.ts" "$@" 
 }
@@ -175,6 +179,7 @@ case $BUSTER_COMMAND in
   "gc") buster_gc "${@:2}" ;;
   "lint") buster_lint "${@:2}" ;;
   "run") buster_run "${@:2}" ;;
+  "script") buster_script "${@:2}" ;;
   "serve") buster_serve "${@:2}" ;;
   "symlinkModules") buster_symlinkModules "${@:2}" ;;
   "test") buster_test "${@:2}" ;;

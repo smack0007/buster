@@ -1,7 +1,20 @@
-import { spawn } from "node:child_process";
+import { type IOType, spawn } from "node:child_process";
+import { Enum } from "./types.ts";
+
+export function cwd(): string {
+  return process.cwd();
+}
+
+export const ExecIOMode = {
+  pipe: 0,
+  inherit: 1,
+} as const;
+export type ExecIOMode = Enum<typeof ExecIOMode>;
 
 export interface ExecOptions {
-  stdin?: string;
+  stdin?: ExecIOMode | string;
+  stdout?: ExecIOMode;
+  stderr?: ExecIOMode;
 }
 
 export interface ExecResult {
@@ -10,25 +23,44 @@ export interface ExecResult {
   stderr: string;
 }
 
-export function exec(
-  args: string[],
-  options: ExecOptions = {}
-): Promise<ExecResult> {
+function mapExecIOMode(value: ExecIOMode | undefined): IOType {
+  if (value === undefined) {
+    return "pipe";
+  }
+
+  switch (value) {
+    case ExecIOMode.pipe:
+      return "pipe";
+
+    case ExecIOMode.inherit:
+      return "inherit";
+  }
+}
+
+export function exec(args: string[], options: ExecOptions = {}): Promise<ExecResult> {
   return new Promise((resolve, reject) => {
     try {
       const process = spawn(args[0], args.slice(1), {
-        stdio: "pipe",
+        stdio: [
+          typeof options.stdin === "string" ? "pipe" : mapExecIOMode(options.stdin),
+          mapExecIOMode(options.stdout),
+          mapExecIOMode(options.stderr),
+        ],
       });
 
       let stdout = "";
-      process.stdout.on("data", (data) => {
-        stdout += data.toString();
-      });
+      if (process.stdout) {
+        process.stdout.on("data", (data) => {
+          stdout += data.toString();
+        });
+      }
 
       let stderr = "";
-      process.stderr.on("data", (data) => {
-        stderr += data.toString();
-      });
+      if (process.stderr) {
+        process.stderr.on("data", (data) => {
+          stderr += data.toString();
+        });
+      }
 
       function onCloseOrExit(code: number): void {
         resolve({
@@ -46,11 +78,14 @@ export function exec(
         reject(err);
       });
 
-      if (options.stdin) {
-        process.stdin.write(options.stdin);
+      if (typeof options.stdin === "string") {
+        if (process.stdin) {
+          process.stdin.write(options.stdin);
+          process.stdin.end();
+        } else {
+          throw new Error("options.stdin is a string but process.stdin is null.");
+        }
       }
-
-      process.stdin.end();
     } catch (err) {
       reject(err);
     }

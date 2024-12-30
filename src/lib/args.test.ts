@@ -15,14 +15,16 @@ const FOO_BAR_CONFIG: ParseArgsConfig<"foo" | "bar"> = {
   },
 };
 
-describe("parseArgs", () => {
-  it("basic test", () => {
-    const args: string[] = ["--foo", "abc", "-b", "42"];
-    deepStrictEqual(parseArgs(args, FOO_BAR_CONFIG), { _: [], foo: "abc", bar: 42 });
-  });
+describe("args.ts", () => {
+  describe("parseArgs", () => {
+    it("basic test", () => {
+      const args: string[] = ["--foo", "abc", "-b", "42"];
+      deepStrictEqual(parseArgs(args, FOO_BAR_CONFIG), { _: [], foo: "abc", bar: 42 });
+    });
 
-  it("default args", () => {
-    const args: string[] = [];
-    deepStrictEqual(parseArgs(args, FOO_BAR_CONFIG), { _: [], foo: "foo", bar: 42 });
+    it("default args", () => {
+      const args: string[] = [];
+      deepStrictEqual(parseArgs(args, FOO_BAR_CONFIG), { _: [], foo: "foo", bar: 42 });
+    });
   });
 });

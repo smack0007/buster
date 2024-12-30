@@ -1,4 +1,5 @@
 import { exists, readTextFile } from "./fs.ts";
+import { cwd } from "./os.ts";
 import { dirname, join } from "./path.ts";
 import { PackageJson } from "./types.ts";
 
@@ -8,7 +9,7 @@ export function assertError(error: unknown): asserts error is Error {
   }
 }
 
-export async function findPackageJson(directory: string): Promise<string | null> {
+export async function findPackageJson(directory: string = cwd()): Promise<string | null> {
   const packageJsonPath = join([directory, "package.json"]);
   if (await exists(packageJsonPath)) {
     return packageJsonPath;
