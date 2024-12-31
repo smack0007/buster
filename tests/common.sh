@@ -33,6 +33,8 @@ buster_expect_error() {
   local actual="$1"
   local expected="${2:-}"
 
+  buster_expect_status_0
+
   if [ ! "${actual:0:${#BUSTER_ERROR_PREFIX}}" = "${BUSTER_ERROR_PREFIX}" ]; then
     buster_logAssertFailed "expected '${actual}' to be an error"
     exit 1
@@ -48,6 +50,13 @@ buster_expect_file() {
 
   if [ ! -f "${expectedFile}" ]; then
     buster_logAssertFailed "expected file '${expectedFile}' to exist"
+    exit 1
+  fi
+}
+
+buster_expect_status_0() {
+  if [ ! "$?" = "0" ]; then
+    buster_logAssertFailed "expected status code 0"
     exit 1
   fi
 }
