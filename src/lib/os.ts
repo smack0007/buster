@@ -1,5 +1,5 @@
 import { type IOType, spawn } from "node:child_process";
-import { Enum } from "./types.ts";
+import { type Enum } from "./types.ts";
 
 export function cwd(): string {
   return process.cwd();
@@ -37,7 +37,7 @@ function mapExecIOMode(value: ExecIOMode | undefined): IOType {
   }
 }
 
-export function exec(args: string[], options: ExecOptions = {}): Promise<ExecResult> {
+export function exec(args: [string, ...string[]], options: ExecOptions = {}): Promise<ExecResult> {
   return new Promise((resolve, reject) => {
     try {
       const process = spawn(args[0], args.slice(1), {

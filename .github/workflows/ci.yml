@@ -17,5 +17,7 @@ jobs:
           node-version: 22.12.0
       - name: Lint
         run: ./lint.sh
+      - name: Check
+        run: ./check.sh
       - name: Tests
         run: ./test.sh

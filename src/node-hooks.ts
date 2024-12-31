@@ -1,6 +1,6 @@
 import { getNodeModulesPath } from "./lib/common.ts";
 import { join } from "node:path";
-import { exec, ExecResult } from "./lib/os.ts";
+import { exec, type ExecResult } from "./lib/os.ts";
 
 const NODE_MODULES_PATH = getNodeModulesPath();
 

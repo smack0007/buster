@@ -85,7 +85,7 @@ buster_compileSelf() {
   
   if [ ! "${BUSTER_IS_RELEASE}" = "1" ]; then
     mkdir -p ${BUSTER_DIST}
-    ${BUSTER_NODE_MODULES_PATH}/.bin/esbuild ${BUSTER_SRC}/$1 --log-level=error --format=esm --platform=node --bundle --sourcemap=external --outfile=${distFilePath}
+    ${BUSTER_NODE_MODULES_PATH}/.bin/esbuild ${BUSTER_SRC}/$1 --log-level=error --format=esm --platform=node --bundle --sourcemap=external --external:vite --outfile=${distFilePath}
   fi
   
   echo "$distFilePath"

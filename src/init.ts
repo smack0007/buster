@@ -11,6 +11,7 @@ const projectName = path.split("/").reverse()[0];
 console.info(`Project name infered to be '${projectName}'.`);
 
 const gitIgnore = `
+dist/
 node_modules/
 tmp/
 `.trimStart();

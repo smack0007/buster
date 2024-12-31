@@ -1,7 +1,7 @@
 import { exists, readTextFile } from "./fs.ts";
 import { cwd } from "./os.ts";
 import { dirname, join } from "./path.ts";
-import { PackageJson } from "./types.ts";
+import { type PackageJson } from "./types.ts";
 
 export function assertError(error: unknown): asserts error is Error {
   if (!(error instanceof Error)) {

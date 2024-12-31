@@ -1,4 +1,4 @@
-import { parseArgs, ParseArgsConfig } from "./args.ts";
+import { parseArgs, type ParseArgsConfig } from "./args.ts";
 import { describe, expect, it } from "./test.ts";
 
 const FOO_BAR_CONFIG: ParseArgsConfig<"foo" | "bar"> = {

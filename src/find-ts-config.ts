@@ -6,7 +6,7 @@ import { findTSConfig } from "./lib/utils.ts";
 
 const args = parseArgs(process.argv.slice(2), {});
 
-if (args._.length === 0) {
+if (args._[0] === undefined) {
   logError("Please provide a directory from which to start the search.");
   exit(1);
 }

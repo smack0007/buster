@@ -9,7 +9,7 @@ function escapeShellArg(arg: string): string {
 
 const args = parseArgs(process.argv.slice(2), {});
 
-if (args._.length === 0) {
+if (args._[0] === undefined) {
   logError("Please provide a script name to run.");
   exit(1);
 }

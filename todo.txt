@@ -1,7 +1,3 @@
-- Move more commands to buster_invoke instead of buster_compileSelf.
-  - For a release we don't want to be compiling ourselves but rather use precompiled scripts.
-- Check only works when using "-p ./tsconfig.json". Check should just search for the nearest tsconfig.json.
 - Help menu
+- fmt command to run prettier
 
-Ideas:
-  - Investigate using a globally installed node so long as it's the expected version.
