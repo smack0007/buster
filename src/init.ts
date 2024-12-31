@@ -1,161 +1,189 @@
-import { ensureDirectory, exists, writeTextFile } from "./lib/fs.ts";
+import { parseArgs } from "./lib/args.ts";
+import { ensureProjectType, ProjectType } from "./lib/common.ts";
+import { ensureDirectory, exists, isDirectory, writeTextFile } from "./lib/fs.ts";
 import { toJson } from "./lib/json.ts";
 import { join, resolve } from "./lib/path.ts";
 
-const args = process.argv.slice(2);
-const path = resolve(args[0] ?? process.cwd());
+const args = parseArgs(process.argv.slice(2), {
+  type: {
+    keys: ["--type", "-t"],
+    type: "string",
+    default: ProjectType.cli,
+  },
+});
 
-console.info(`Initializing buster project at '${path}'...`);
+const path = resolve(args._[0] ?? process.cwd());
+const projectType = ensureProjectType(args.type);
+
+console.info(`Initializing buster "${projectType}" project at "${path}"...`);
+await ensureDirectory(path);
 
 const projectName = path.split("/").reverse()[0];
 console.info(`Project name infered to be '${projectName}'.`);
 
-const gitIgnore = `
+async function writeGitIgnore(): Promise<void> {
+  const gitIgnore = `
 dist/
 node_modules/
 tmp/
 `.trimStart();
 
-const gitIgnorePath = join([path, ".gitignore"]);
-if (!(await exists(gitIgnorePath))) {
-  console.info(`Writing '${gitIgnorePath}'.`);
-  await writeTextFile(gitIgnorePath, gitIgnore);
-} else {
+  const gitIgnorePath = join([path, ".gitignore"]);
+  if (!(await exists(gitIgnorePath))) {
+    console.info(`Writing '${gitIgnorePath}'.`);
+    await writeTextFile(gitIgnorePath, gitIgnore);
+  } else {
+  }
 }
 
-const packageJson = {
-  name: "",
-  description: "",
-  version: "0.0.1",
-  type: "module",
-  main: "./src/main.ts",
-};
+async function writePackageJson(): Promise<void> {
+  const packageJson = {
+    name: "",
+    description: "",
+    version: "0.0.1",
+    type: "module",
+    main: "./src/main.ts",
+  };
 
-const packageJsonPath = join([path, "package.json"]);
-if (!(await exists(packageJsonPath))) {
-  console.info(`Writing '${packageJsonPath}'.`);
+  const packageJsonPath = join([path, "package.json"]);
+  if (!(await exists(packageJsonPath))) {
+    console.info(`Writing '${packageJsonPath}'.`);
 
-  await writeTextFile(
-    packageJsonPath,
-    toJson({
-      ...packageJson,
-      name: projectName,
-    }),
-  );
-} else {
+    await writeTextFile(
+      packageJsonPath,
+      toJson({
+        ...packageJson,
+        name: projectName,
+      }),
+    );
+  } else {
+  }
 }
 
-const tsconfig = {
-  compilerOptions: {
-    noEmit: true,
+async function writeTSConfig(): Promise<void> {
+  const tsconfig = {
+    compilerOptions: {
+      noEmit: true,
 
-    target: "ESNext",
-    module: "NodeNext",
-    moduleResolution: "nodenext",
+      target: "ESNext",
+      module: "NodeNext",
+      moduleResolution: "nodenext",
 
-    strict: true,
-    allowImportingTsExtensions: true,
-  },
-  include: ["**/*.ts"],
-};
-
-const tsconfigPath = join([path, "tsconfig.json"]);
-if (!(await exists(tsconfigPath))) {
-  console.info(`Writing '${tsconfigPath}'.`);
-  await writeTextFile(tsconfigPath, toJson(tsconfig));
-} else {
-}
-
-const oxlintrc = {
-  plugins: ["typescript"],
-  rules: {
-    "@typescript-eslint/explicit-function-return-type": "error",
-  },
-};
-
-const oxlintrcPath = join([path, ".oxlintrc.json"]);
-if (!(await exists(oxlintrcPath))) {
-  console.info(`Writing '${oxlintrcPath}'.`);
-  await writeTextFile(oxlintrcPath, toJson(oxlintrc));
-} else {
-}
-
-const vscodeSettings = {
-  "typescript.preferences.importModuleSpecifierEnding": "js",
-};
-
-const vscodeSettingsPath = join([path, ".vscode", "settings.json"]);
-if (!(await exists(vscodeSettingsPath))) {
-  console.info(`Writing '${vscodeSettingsPath}'.`);
-  await ensureDirectory(join([path, ".vscode"]));
-  await writeTextFile(vscodeSettingsPath, toJson(vscodeSettings));
-} else {
-}
-
-const vscodeTasks = {
-  version: "2.0.0",
-  tasks: [
-    {
-      label: "Lint",
-      group: {
-        kind: "none",
-        isDefault: false,
-      },
-      presentation: {
-        echo: true,
-        reveal: "always",
-        focus: false,
-        panel: "shared",
-        showReuseMessage: false,
-        clear: true,
-      },
-      type: "process",
-      command: "buster",
-      args: ["lint"],
-      options: {
-        cwd: "${workspaceFolder}",
-      },
-      problemMatcher: ["$tsc"],
+      strict: true,
+      allowImportingTsExtensions: true,
     },
-    {
-      label: "Run",
-      group: {
-        kind: "none",
-        isDefault: true,
-      },
-      presentation: {
-        echo: true,
-        reveal: "always",
-        focus: false,
-        panel: "shared",
-        showReuseMessage: false,
-        clear: true,
-      },
-      type: "process",
-      command: "buster",
-      args: ["run", "./src/main.ts"],
-      options: {
-        cwd: "${workspaceFolder}",
-      },
-      problemMatcher: ["$tsc"],
-    },
-  ],
-};
+    include: ["**/*.ts"],
+  };
 
-const vscodeTasksPath = join([path, ".vscode", "tasks.json"]);
-if (!(await exists(vscodeTasksPath))) {
-  console.info(`Writing '${vscodeTasksPath}'.`);
-  await ensureDirectory(join([path, ".vscode"]));
-  await writeTextFile(vscodeTasksPath, toJson(vscodeTasks));
-} else {
+  const tsconfigPath = join([path, "tsconfig.json"]);
+  if (!(await exists(tsconfigPath))) {
+    console.info(`Writing '${tsconfigPath}'.`);
+    await writeTextFile(tsconfigPath, toJson(tsconfig));
+  } else {
+  }
 }
 
-const mainSourceFile = `console.info("Hello World!");`;
+async function writeOxlintRC(): Promise<void> {
+  const oxlintrc = {
+    plugins: ["typescript"],
+    rules: {
+      "@typescript-eslint/explicit-function-return-type": "error",
+    },
+  };
 
-const mainSourceFilePath = join([path, "src", "main.ts"]);
-if (!(await exists(mainSourceFilePath))) {
-  console.info(`Writing '${mainSourceFilePath}'.`);
-  await ensureDirectory(join([path, "src"]));
-  await writeTextFile(mainSourceFilePath, mainSourceFile);
-} else {
+  const oxlintrcPath = join([path, ".oxlintrc.json"]);
+  if (!(await exists(oxlintrcPath))) {
+    console.info(`Writing '${oxlintrcPath}'.`);
+    await writeTextFile(oxlintrcPath, toJson(oxlintrc));
+  } else {
+  }
+}
+
+async function writeVSCodeSettings(): Promise<void> {
+  const vscodeSettings = {
+    "typescript.preferences.importModuleSpecifierEnding": "js",
+  };
+
+  const vscodeSettingsPath = join([path, ".vscode", "settings.json"]);
+  if (!(await exists(vscodeSettingsPath))) {
+    console.info(`Writing '${vscodeSettingsPath}'.`);
+    await ensureDirectory(join([path, ".vscode"]));
+    await writeTextFile(vscodeSettingsPath, toJson(vscodeSettings));
+  } else {
+  }
+}
+
+async function writeVSCodeTasks(): Promise<void> {
+  const baseTask = {
+    presentation: {
+      echo: true,
+      reveal: "always",
+      focus: false,
+      panel: "shared",
+      showReuseMessage: false,
+      clear: true,
+    },
+    type: "process",
+    options: {
+      cwd: "${workspaceFolder}",
+    },
+    problemMatcher: ["$tsc"],
+  } as const;
+
+  const vscodeTasks = {
+    version: "2.0.0",
+    tasks: [
+      {
+        ...baseTask,
+        label: "Lint",
+        group: {
+          kind: "none",
+          isDefault: false,
+        },
+        command: "buster",
+        args: ["lint"],
+      },
+      {
+        ...baseTask,
+        label: "Run",
+        group: {
+          kind: "none",
+          isDefault: true,
+        },
+        command: "buster",
+        args: ["run", "./src/main.ts"],
+      },
+    ],
+  };
+
+  const vscodeTasksPath = join([path, ".vscode", "tasks.json"]);
+  if (!(await exists(vscodeTasksPath))) {
+    console.info(`Writing '${vscodeTasksPath}'.`);
+    await ensureDirectory(join([path, ".vscode"]));
+    await writeTextFile(vscodeTasksPath, toJson(vscodeTasks));
+  } else {
+  }
+}
+
+async function writeCliMain(): Promise<void> {
+  const mainSourceFile = `console.info("Hello World!");`;
+
+  const mainSourceFilePath = join([path, "src", "main.ts"]);
+  if (!(await exists(mainSourceFilePath))) {
+    console.info(`Writing '${mainSourceFilePath}'.`);
+    await ensureDirectory(join([path, "src"]));
+    await writeTextFile(mainSourceFilePath, mainSourceFile);
+  } else {
+  }
+}
+
+await writeGitIgnore();
+await writePackageJson();
+await writeTSConfig();
+await writeOxlintRC();
+await writeVSCodeSettings();
+await writeVSCodeTasks();
+
+if (projectType === ProjectType.cli) {
+  await writeCliMain();
 }
