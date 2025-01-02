@@ -41,6 +41,8 @@ BUSTER_NODE_MODULES_IDENTIFIER="${BUSTER_NODE_IDENTIFIER}-$(buster_calculateHash
 BUSTER_NODE_MODULES_PATH="${BUSTER_PATH}/node_modules"
 BUSTER_OXLINT_EXE="${BUSTER_NODE_MODULES_PATH}/@oxlint/$(echo "${BUSTER_PLATFORM}" | sed 's/linux-x64/linux-x64-gnu/')/oxlint"
 
+BUSTER_VERBOSE=${BUSTER_VERBOSE:-0}
+
 BUSTER_IS_RELEASE=${BUSTER_IS_RELEASE:-0}
 if [ ! -d "${BUSTER_SRC}" ]; then
   BUSTER_IS_RELEASE=1
@@ -56,7 +58,7 @@ buster_ensureNode() {
   if [ ! -d "${BUSTER_NODE_PATH}" ]; then
     mkdir -p ${BUSTER_TMP}
     pushd ${BUSTER_TMP} > /dev/null
-    BUSTER_NODE_DOWNLOAD_URL=https://nodejs.org/dist/${BUSTER_NODE_VERSION}/${BUSTER_NODE_IDENTIFIER}.tar.gz
+    BUSTER_NODE_DOWNLOAD_URL=https://nodejs.org/dist/${BUSTER_NODE_VERSION}/${BUSTER_NODE_IDENTIFIER}.tar.gz    
     if ! wget -q ${BUSTER_NODE_DOWNLOAD_URL}; then
       echo "Failed to download ${BUSTER_NODE_DOWNLOAD_URL}"
       exit
@@ -73,7 +75,12 @@ buster_ensureNode() {
 buster_ensureNodeModules() {
   if [ ! -d "${BUSTER_NODE_MODULES_PATH}" ] || [ ! "$(cat ${BUSTER_PATH}/node_modules.version)" == "${BUSTER_NODE_MODULES_IDENTIFIER}" ]; then
     # TODO: Would be nice if it would only output on error situations
-    ${BUSTER_NODE_PATH}/bin/npm i --prefix ${BUSTER_PATH} --package-lock=false > /dev/null
+    local npmInstall="${BUSTER_NODE_PATH}/bin/npm i --prefix ${BUSTER_PATH} --package-lock=false"
+    if [ "${BUSTER_VERBOSE}" = "1" ]; then
+      $npmInstall
+    else
+      $npmInstall > /dev/null
+    fi
     echo "${BUSTER_NODE_MODULES_IDENTIFIER}" > ${BUSTER_PATH}/node_modules.version
   fi
 }
@@ -168,7 +175,7 @@ buster_test() {
   buster_run "--test **/$name.test.ts **/$name.spec.ts ${@:2}"
 }
 
-if [ ! $BUSTER_COMMAND = "gc" ]; then
+if [ ! "${BUSTER_COMMAND}" = "gc" ]; then
   buster_ensureNode
   buster_ensureNodeModules
 
@@ -176,7 +183,7 @@ if [ ! $BUSTER_COMMAND = "gc" ]; then
   PATH="${BUSTER_PATH}/bin:${PATH}"
 fi
 
-case $BUSTER_COMMAND in
+case "${BUSTER_COMMAND}" in
   "bundle") buster_bundle "${@:2}" ;;
   "check") buster_check "${@:2}" ;;
   "init") buster_init "${@:2}" ;;

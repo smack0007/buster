@@ -1,6 +1,6 @@
 import { parseArgs } from "./lib/args.ts";
 import { ensureProjectType, ProjectType } from "./lib/common.ts";
-import { ensureDirectory, exists, isDirectory, writeTextFile } from "./lib/fs.ts";
+import { ensureDirectory, exists, writeTextFile } from "./lib/fs.ts";
 import { toJson } from "./lib/json.ts";
 import { join, resolve } from "./lib/path.ts";
 
