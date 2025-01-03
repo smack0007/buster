@@ -4,3 +4,4 @@ rt/
 tmp/
 node_modules.version
 package-lock.json
+pnpm-lock.yaml
