@@ -1,4 +1,4 @@
-import { deepStrictEqual, strictEqual } from "node:assert";
+import { AssertionError, deepStrictEqual, strictEqual } from "node:assert";
 import { isObject } from "./utils.ts";
 
 export { describe, it } from "node:test";
@@ -6,7 +6,7 @@ export { describe, it } from "node:test";
 class Expect<T> {
   private readonly isObject;
 
-  constructor(private readonly value: T) {
+  public constructor(protected readonly value: T) {
     this.isObject = isObject(value);
   }
 
@@ -19,6 +19,33 @@ class Expect<T> {
   }
 }
 
+class ExpectFunction<T extends Function> extends Expect<T> {
+  public constructor(func: T) {
+    super(func);
+  }
+
+  public toThrow(): void {
+    try {
+      this.value();
+      throw new AssertionError({
+        message: "Expected function to throw.",
+      });
+    } catch {}
+  }
+}
+
+export function expect<T extends Function>(func: T): ExpectFunction<T>;
+export function expect<T>(value: T): Expect<T>;
 export function expect<T>(value: T): Expect<T> {
-  return new Expect<T>(value);
+  if (value instanceof Function) {
+    return new ExpectFunction(value);
+  } else {
+    return new Expect(value);
+  }
+}
+
+export function fail(message?: string): never {
+  throw new AssertionError({
+    message: message ?? "Test failed.",
+  });
 }

@@ -1,7 +1,7 @@
 import { exists, readTextFile } from "./fs.ts";
 import { cwd } from "./os.ts";
 import { dirname, join } from "./path.ts";
-import { type PackageJson } from "./types.ts";
+import { type PackageJson, type ToString } from "./types.ts";
 
 export function assertError(error: unknown): asserts error is Error {
   if (!(error instanceof Error)) {
@@ -35,12 +35,16 @@ export async function findTSConfig(directory: string): Promise<string | null> {
   return await findTSConfig(dirname(directory));
 }
 
-export function isObject(obj: unknown): obj is {} {
-  return typeof obj === "object" && obj !== null && !Array.isArray(obj);
+export function isObject(value: unknown): value is {} {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 export function isNodeError(error: Error): error is Error & { code: string } {
   return typeof (error as unknown as { code: string }).code === "string";
+}
+
+export function hasToStringMethod(value: unknown): value is ToString {
+  return typeof (value as ToString)["toString"] === "function";
 }
 
 export async function loadPackageJson(path: string): Promise<PackageJson> {

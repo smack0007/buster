@@ -175,6 +175,16 @@ buster_test() {
   buster_run "--test **/$name.test.ts **/$name.spec.ts ${@:2}"
 }
 
+buster_cli() {
+  if [ ! "${BUSTER_IS_RELEASE}" = "1" ]; then
+    mkdir -p "${BUSTER_DIST}"
+    "${BUSTER_NODE_MODULES_PATH}/.bin/esbuild" "${BUSTER_SRC}/cli.ts" --log-level=error --format=esm --platform=node --bundle --sourcemap=external --external:vite "--outdir=${BUSTER_DIST}"
+  fi
+
+  BUSTER_NODE_MODULES_PATH=${BUSTER_NODE_MODULES_PATH} \
+    ${BUSTER_NODE_EXE} "${BUSTER_DIST}/cli.js" ${@}
+}
+
 if [ ! "${BUSTER_COMMAND}" = "gc" ]; then
   buster_ensureNode
   buster_ensureNodeModules
@@ -187,12 +197,12 @@ case "${BUSTER_COMMAND}" in
   "bundle") buster_bundle "${@:2}" ;;
   "check") buster_check "${@:2}" ;;
   "init") buster_init "${@:2}" ;;
+  "install") buster_cli "${@}" ;;
   "gc") buster_gc "${@:2}" ;;
   "lint") buster_lint "${@:2}" ;;
   "run") buster_run "${@:2}" ;;
   "script") buster_script "${@:2}" ;;
   "serve") buster_serve "${@:2}" ;;
-  "symlinkModules") buster_symlinkModules "${@:2}" ;;
   "test") buster_test "${@:2}" ;;
   *)
     if [ ! "$@" = "" ]; then

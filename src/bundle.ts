@@ -9,19 +9,20 @@ import { findPackageJson, loadPackageJson } from "./lib/utils.ts";
 const NODE_MODULES_PATH = getNodeModulesPath();
 
 const args = parseArgs(process.argv.slice(2), {
-  output: {
-    keys: ["--output", "-o"],
-    type: "string",
+  positional: {
+    key: "inputFile",
+    single: true,
+  },
+  options: {
+    output: {
+      keys: ["--output", "-o"],
+      type: "string",
+    },
   },
 });
 
-if (args._[0] === undefined) {
+if (args.inputFile === "") {
   logError("Please provide an input file.");
-  exit(1);
-}
-
-if (args._.length > 1) {
-  logError("Multiple input files currently not supported.");
   exit(1);
 }
 
@@ -30,8 +31,8 @@ if (args.output === undefined) {
   exit(1);
 }
 
-let inputFile = resolve(args._[0]);
-const outputFile = resolve(args.output as string);
+let inputFile = resolve(args.inputFile);
+const outputFile = resolve(args.output);
 
 if (await isDirectory(inputFile)) {
   const packageJsonPath = await findPackageJson(inputFile);

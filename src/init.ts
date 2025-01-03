@@ -5,14 +5,20 @@ import { toJson } from "./lib/json.ts";
 import { join, resolve } from "./lib/path.ts";
 
 const args = parseArgs(process.argv.slice(2), {
-  type: {
-    keys: ["--type", "-t"],
-    type: "string",
-    default: ProjectType.cli,
+  positional: {
+    key: "directory",
+    single: true,
+  },
+  options: {
+    type: {
+      keys: ["--type", "-t"],
+      type: "string",
+      default: ProjectType.cli,
+    },
   },
 });
 
-const path = resolve(args._[0] ?? process.cwd());
+const path = resolve(args.directory ?? process.cwd());
 const projectType = ensureProjectType(args.type);
 
 console.info(`Initializing buster "${projectType}" project at "${path}"...`);

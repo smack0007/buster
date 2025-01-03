@@ -7,15 +7,20 @@ function escapeShellArg(arg: string): string {
   return `'${arg.replace(/'/g, `'\\''`)}'`;
 }
 
-const args = parseArgs(process.argv.slice(2), {});
+const args = parseArgs(process.argv.slice(2), {
+  positional: {
+    key: "script",
+  },
+  options: {},
+});
 
-if (args._[0] === undefined) {
+if (args.script[0] === undefined) {
   logError("Please provide a script name to run.");
   exit(1);
 }
 
-const scriptName = args._[0];
-const scriptArgs = args._.slice(1);
+const scriptName = args.script[0];
+const scriptArgs = args.script.slice(1);
 
 const packageJsonPath = await findPackageJson();
 

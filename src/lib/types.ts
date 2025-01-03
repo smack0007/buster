@@ -4,6 +4,8 @@
 
 export type ArrayValues<T extends readonly unknown[]> = T[number];
 
+export type DeepReadonly<T> = { readonly [P in keyof T]: DeepReadonly<T[P]> };
+
 export type Enum<T extends Record<string, unknown>> = T[keyof T];
 
 export type RecordKeys<T extends Record<string | number | symbol, unknown>> = keyof T;
