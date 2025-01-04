@@ -37,6 +37,21 @@ fi
 
 BUSTER_NODE_EXE="${BUSTER_NODE_PATH}/bin/node --enable-source-maps"
 
+if command -v pnpm > /dev/null; then
+  BUSTER_PNPM_PATH="$(realpath $(dirname $(command -v pnpm)))"
+  BUSTER_PNPM_VERSION="v$(pnpm --version)"
+  BUSTER_PNPM_IDENTIFIER="pnpm-${BUSTER_PNPM_VERSION}-${BUSTER_PLATFORM}"
+else
+  BUSTER_PNPM_VERSION=v9.15.2
+  BUSTER_PNPM_IDENTIFIER="pnpm-${BUSTER_PNPM_VERSION}-${BUSTER_PLATFORM}"
+  BUSTER_PNPM_PATH="${BUSTER_RT}/${BUSTER_PNPM_IDENTIFIER}"
+
+  # If we're handling pnpm ourselves then add it to the path.
+  PATH="${BUSTER_PNPM_PATH}:${PATH}"
+fi
+
+BUSTER_PNPM_EXE="${BUSTER_PNPM_PATH}/pnpm"
+
 BUSTER_NODE_MODULES_IDENTIFIER="${BUSTER_NODE_IDENTIFIER}-$(buster_calculateHash "${BUSTER_PATH}/package.json")"
 BUSTER_NODE_MODULES_PATH="${BUSTER_PATH}/node_modules"
 BUSTER_OXLINT_EXE="${BUSTER_NODE_MODULES_PATH}/@oxlint/$(echo "${BUSTER_PLATFORM}" | sed 's/linux-x64/linux-x64-gnu/')/oxlint"
@@ -54,13 +69,17 @@ if [ -d "${BUSTER_TMP}" ]; then
   rm -rf "${BUSTER_TMP}"
 fi
 
+buster_download() {
+  wget -q "$1"
+}
+
 buster_ensureNode() {
   if [ ! -d "${BUSTER_NODE_PATH}" ]; then
     mkdir -p ${BUSTER_TMP}
     pushd ${BUSTER_TMP} > /dev/null
-    BUSTER_NODE_DOWNLOAD_URL=https://nodejs.org/dist/${BUSTER_NODE_VERSION}/${BUSTER_NODE_IDENTIFIER}.tar.gz    
-    if ! wget -q ${BUSTER_NODE_DOWNLOAD_URL}; then
-      echo "Failed to download ${BUSTER_NODE_DOWNLOAD_URL}"
+    local downloadUrl=https://nodejs.org/dist/${BUSTER_NODE_VERSION}/${BUSTER_NODE_IDENTIFIER}.tar.gz    
+    if ! buster_download "${downloadUrl}"; then
+      echo "Failed to download node from \"${downloadUrl}\""
       exit
     fi
     tar xzf ${BUSTER_NODE_IDENTIFIER}.tar.gz
@@ -73,13 +92,26 @@ buster_ensureNode() {
 }
 
 buster_ensureNodeModules() {
+  if [ ! -d "${BUSTER_PNPM_PATH}" ]; then
+    mkdir -p ${BUSTER_PNPM_PATH}
+    pushd ${BUSTER_PNPM_PATH} > /dev/null
+    local downloadUrl=https://github.com/pnpm/pnpm/releases/download/${BUSTER_PNPM_VERSION}/pnpm-${BUSTER_PLATFORM}
+    if ! buster_download "${downloadUrl}"; then
+      echo "Failed to download pnpm from \"${downloadUrl}\""
+      exit
+    fi
+    mv pnpm-${BUSTER_PLATFORM} pnpm
+    chmod +x pnpm
+    popd > /dev/null
+  fi
+
   if [ ! -d "${BUSTER_NODE_MODULES_PATH}" ] || [ ! "$(cat ${BUSTER_PATH}/node_modules.version)" == "${BUSTER_NODE_MODULES_IDENTIFIER}" ]; then
     # TODO: Would be nice if it would only output on error situations
-    local npmInstall="${BUSTER_NODE_PATH}/bin/npm i --prefix ${BUSTER_PATH} --package-lock=false"
+    local npmInstall="${BUSTER_PNPM_EXE} i --prefix ${BUSTER_PATH}"
     if [ "${BUSTER_VERBOSE}" = "1" ]; then
       $npmInstall
     else
-      $npmInstall > /dev/null
+      $npmInstall --silent
     fi
     echo "${BUSTER_NODE_MODULES_IDENTIFIER}" > ${BUSTER_PATH}/node_modules.version
   fi
@@ -209,6 +241,8 @@ case "${BUSTER_COMMAND}" in
       buster_run "$@"
     else
       echo "Buster ${BUSTER_VERSION} (pew pew pew)"
+      echo "  node ${BUSTER_NODE_VERSION}"
+      echo "  pnpm ${BUSTER_PNPM_VERSION}"
     fi
     ;;
 esac
