@@ -54,7 +54,7 @@ BUSTER_PNPM_EXE="${BUSTER_PNPM_PATH}/pnpm"
 
 BUSTER_NODE_MODULES_IDENTIFIER="${BUSTER_NODE_IDENTIFIER}-$(buster_calculateHash "${BUSTER_PATH}/package.json")"
 BUSTER_NODE_MODULES_PATH="${BUSTER_PATH}/node_modules"
-BUSTER_OXLINT_EXE="${BUSTER_NODE_MODULES_PATH}/@oxlint/$(echo "${BUSTER_PLATFORM}" | sed 's/linux-x64/linux-x64-gnu/')/oxlint"
+BUSTER_OXLINT_EXE="${BUSTER_NODE_MODULES_PATH}/.bin/oxlint"
 
 BUSTER_VERBOSE=${BUSTER_VERBOSE:-0}
 
@@ -91,10 +91,11 @@ buster_ensureNode() {
   fi
 }
 
-buster_ensureNodeModules() {
+buster_ensurePNPM() {
   if [ ! -d "${BUSTER_PNPM_PATH}" ]; then
     mkdir -p ${BUSTER_PNPM_PATH}
     pushd ${BUSTER_PNPM_PATH} > /dev/null
+    
     local downloadUrl=https://github.com/pnpm/pnpm/releases/download/${BUSTER_PNPM_VERSION}/pnpm-${BUSTER_PLATFORM}
     if ! buster_download "${downloadUrl}"; then
       echo "Failed to download pnpm from \"${downloadUrl}\""
@@ -102,9 +103,12 @@ buster_ensureNodeModules() {
     fi
     mv pnpm-${BUSTER_PLATFORM} pnpm
     chmod +x pnpm
+    
     popd > /dev/null
   fi
+}
 
+buster_ensureNodeModules() {
   if [ ! -d "${BUSTER_NODE_MODULES_PATH}" ] || [ ! "$(cat ${BUSTER_PATH}/node_modules.version)" == "${BUSTER_NODE_MODULES_IDENTIFIER}" ]; then
     # TODO: Would be nice if it would only output on error situations
     local npmInstall="${BUSTER_PNPM_EXE} i --prefix ${BUSTER_PATH}"
@@ -213,12 +217,14 @@ buster_cli() {
     "${BUSTER_NODE_MODULES_PATH}/.bin/esbuild" "${BUSTER_SRC}/cli.ts" --log-level=error --format=esm --platform=node --bundle --sourcemap=external --external:vite "--outdir=${BUSTER_DIST}"
   fi
 
-  BUSTER_NODE_MODULES_PATH=${BUSTER_NODE_MODULES_PATH} \
+  BUSTER_PNPM_PATH="${BUSTER_PNPM_PATH}" \
+  BUSTER_NODE_MODULES_PATH="${BUSTER_NODE_MODULES_PATH}" \
     ${BUSTER_NODE_EXE} "${BUSTER_DIST}/cli.js" ${@}
 }
 
 if [ ! "${BUSTER_COMMAND}" = "gc" ]; then
   buster_ensureNode
+  buster_ensurePNPM
   buster_ensureNodeModules
 
   # buster calls back to itself sometimes so ensure it's on the PATH
@@ -241,8 +247,8 @@ case "${BUSTER_COMMAND}" in
       buster_run "$@"
     else
       echo "Buster ${BUSTER_VERSION} (pew pew pew)"
-      echo "  node ${BUSTER_NODE_VERSION}"
-      echo "  pnpm ${BUSTER_PNPM_VERSION}"
+      echo "  node ${BUSTER_NODE_VERSION} ${BUSTER_NODE_EXE}"
+      echo "  pnpm ${BUSTER_PNPM_VERSION} ${BUSTER_PNPM_EXE}"
     fi
     ;;
 esac

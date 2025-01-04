@@ -3,6 +3,10 @@ import { exit } from "./os.ts";
 import type { Enum } from "./types.ts";
 import { throwError } from "./utils.ts";
 
+export function getPNPMPath(): string {
+  return process.env["BUSTER_PNPM_PATH"] ?? throwError("BUSTER_PNPM_PATH was not defined.");
+}
+
 export function getNodeModulesPath(): string {
   return process.env["BUSTER_NODE_MODULES_PATH"] ?? throwError("BUSTER_NODE_MODULES_PATH was not defined.");
 }
