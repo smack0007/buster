@@ -3,11 +3,11 @@
   "version": "0.0.1",
   "type": "module",
   "dependencies": {
-    "@types/node": "22.10.3",
+    "@types/node": "22.10.5",
     "esbuild": "0.24.2",
-    "oxlint": "0.15.4",
+    "oxlint": "0.15.5",
     "prettier": "3.4.2",
     "typescript": "5.7.2",
-    "vite": "6.0.6"
+    "vite": "6.0.7"
   }
 }
