@@ -1,6 +1,6 @@
 dist/
+ext/
 node_modules/
-rt/
 tmp/
 node_modules.version
 package-lock.json

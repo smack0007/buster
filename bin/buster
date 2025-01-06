@@ -15,7 +15,7 @@ buster_logError() {
 
 BUSTER_PATH="$(realpath $(dirname $(realpath "${BASH_SOURCE[0]}"))/..)"
 BUSTER_DIST=${BUSTER_PATH}/dist
-BUSTER_RT=${BUSTER_PATH}/rt
+BUSTER_EXT=${BUSTER_PATH}/ext
 BUSTER_SRC=${BUSTER_PATH}/src
 BUSTER_TMP=${BUSTER_PATH}/tmp
 BUSTER_PLATFORM="$(echo "$(uname -s)-$(uname -m)" | tr '[:upper:]' '[:lower:]' | sed 's/x86_64/x64/')"
@@ -29,7 +29,7 @@ if command -v node > /dev/null; then
 else
   BUSTER_NODE_VERSION=v22.12.0
   BUSTER_NODE_IDENTIFIER="node-${BUSTER_NODE_VERSION}-${BUSTER_PLATFORM}"
-  BUSTER_NODE_PATH="${BUSTER_RT}/${BUSTER_NODE_IDENTIFIER}"
+  BUSTER_NODE_PATH="${BUSTER_EXT}/${BUSTER_NODE_IDENTIFIER}"
 
   # If we're handling node ourselves then add it to the path.
   PATH="${BUSTER_NODE_PATH}/bin:${PATH}"
@@ -37,14 +37,15 @@ fi
 
 BUSTER_NODE_EXE="${BUSTER_NODE_PATH}/bin/node --enable-source-maps"
 
+BUSTER_PNPM_PLATFORM="$(echo "${BUSTER_PLATFORM}" | sed 's/darwin/macos/')"
 if command -v pnpm > /dev/null; then
   BUSTER_PNPM_PATH="$(realpath $(dirname $(command -v pnpm)))"
   BUSTER_PNPM_VERSION="v$(pnpm --version)"
-  BUSTER_PNPM_IDENTIFIER="pnpm-${BUSTER_PNPM_VERSION}-${BUSTER_PLATFORM}"
+  BUSTER_PNPM_IDENTIFIER="pnpm-${BUSTER_PNPM_VERSION}-${BUSTER_PNPM_PLATFORM}"
 else
-  BUSTER_PNPM_VERSION=v9.15.2
-  BUSTER_PNPM_IDENTIFIER="pnpm-${BUSTER_PNPM_VERSION}-${BUSTER_PLATFORM}"
-  BUSTER_PNPM_PATH="${BUSTER_RT}/${BUSTER_PNPM_IDENTIFIER}"
+  BUSTER_PNPM_VERSION=v9.15.3
+  BUSTER_PNPM_IDENTIFIER="pnpm-${BUSTER_PNPM_VERSION}-${BUSTER_PNPM_PLATFORM}"
+  BUSTER_PNPM_PATH="${BUSTER_EXT}/${BUSTER_PNPM_IDENTIFIER}"
 
   # If we're handling pnpm ourselves then add it to the path.
   PATH="${BUSTER_PNPM_PATH}:${PATH}"
@@ -63,8 +64,8 @@ if [ ! -d "${BUSTER_SRC}" ]; then
   BUSTER_IS_RELEASE=1
 fi
 
-# Ensure rt and remove tmp if it exists
-mkdir -p ${BUSTER_RT}
+# Ensure ext and remove tmp if it exists
+mkdir -p ${BUSTER_EXT}
 if [ -d "${BUSTER_TMP}" ]; then
   rm -rf "${BUSTER_TMP}"
 fi
@@ -92,16 +93,16 @@ buster_ensureNode() {
 }
 
 buster_ensurePNPM() {
-  if [ ! -d "${BUSTER_PNPM_PATH}" ]; then
+  if [ ! -f "${BUSTER_PNPM_PATH}/pnpm" ]; then
     mkdir -p ${BUSTER_PNPM_PATH}
     pushd ${BUSTER_PNPM_PATH} > /dev/null
     
-    local downloadUrl=https://github.com/pnpm/pnpm/releases/download/${BUSTER_PNPM_VERSION}/pnpm-${BUSTER_PLATFORM}
+    local downloadUrl=https://github.com/pnpm/pnpm/releases/download/${BUSTER_PNPM_VERSION}/pnpm-${BUSTER_PNPM_PLATFORM}
     if ! buster_download "${downloadUrl}"; then
       echo "Failed to download pnpm from \"${downloadUrl}\""
       exit
     fi
-    mv pnpm-${BUSTER_PLATFORM} pnpm
+    mv pnpm-${BUSTER_PNPM_PLATFORM} pnpm
     chmod +x pnpm
     
     popd > /dev/null
@@ -178,9 +179,9 @@ buster_gc() {
   local command="${1:-}"
 
   case $command in
-    "rt") rm -rf "${BUSTER_RT}" ;;
+    "ext") rm -rf "${BUSTER_EXT}" ;;
     *)
-      rm -rf "${BUSTER_RT}"
+      rm -rf "${BUSTER_EXT}"
       ;;
   esac
 }
