@@ -57,6 +57,7 @@ buster_expect_file() {
 buster_expect_status_0() {
   if [ ! "$?" = "0" ]; then
     buster_logAssertFailed "expected status code 0"
+    echo "${1:-}"
     exit 1
   fi
 }
