@@ -233,6 +233,7 @@ if [ ! "${BUSTER_COMMAND}" = "gc" ]; then
 fi
 
 case "${BUSTER_COMMAND}" in
+  "add") buster_cli "${@}" ;;
   "bundle") buster_bundle "${@:2}" ;;
   "check") buster_check "${@:2}" ;;
   "init") buster_init "${@:2}" ;;

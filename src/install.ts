@@ -4,15 +4,17 @@ import { join } from "./lib/path.ts";
 
 export interface InstallArgs {}
 
-export function parseInstallArgs(_args: string[]): InstallArgs {
+export function parse(_args: string[]): InstallArgs {
   return {};
 }
 
-export async function install(_args: InstallArgs): Promise<void> {
+export async function run(_args: InstallArgs): Promise<number> {
   const pnpmExePath = join([getPNPMPath(), "pnpm"]);
 
-  await exec([pnpmExePath, "install"], {
+  const result = await exec([pnpmExePath, "install"], {
     stdout: ExecIOMode.inherit,
     stderr: ExecIOMode.inherit,
   });
+
+  return result.code;
 }
