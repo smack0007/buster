@@ -1,22 +1,4 @@
 {
-  "compilerOptions": {
-    "noEmit": true,
-
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "target": "es2022",
-    "resolveJsonModule": true,
-    "moduleDetection": "force",
-    "isolatedModules": true,
-    "verbatimModuleSyntax": true,
-    "allowImportingTsExtensions": true,
-
-    "strict": true,
-    "noUncheckedIndexedAccess": true,
-    "noImplicitOverride": true,
-
-    "module": "NodeNext",
-    "moduleResolution": "nodenext"
-  },
+  "extends": "@buster/configs/tsconfig.json",
   "include": ["**/*.ts"]
 }

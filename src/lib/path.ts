@@ -5,6 +5,10 @@ import {
   join as nodeJoin,
   resolve as nodeResolve,
 } from "node:path";
+import { IS_WINDOWS } from "./os.ts";
+
+export const SEPERATOR = IS_WINDOWS ? "\\" : "/";
+export const SEPERATOR_PATTERN = IS_WINDOWS ? /[\\/]+/ : /\/+/;
 
 export function basename(path: string): string {
   return nodeBasename(path);
@@ -24,4 +28,8 @@ export function join(parts: string[]): string {
 
 export function resolve(path: string): string {
   return nodeResolve(path);
+}
+
+export function split(path: string): string[] {
+  return path.split(SEPERATOR);
 }

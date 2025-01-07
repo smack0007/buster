@@ -1,9 +1,9 @@
 import { mkdir, readdir, readFile, stat, symlink as nodeSymlink, writeFile } from "node:fs/promises";
 import { assertError, isNodeError } from "../lib/utils.ts";
 
-export async function ensureDirectory(path: string, options?: Parameters<typeof mkdir>[1]): Promise<void> {
+export async function ensureDirectory(path: string): Promise<void> {
   try {
-    await mkdir(path, options);
+    await mkdir(path, { recursive: true });
   } catch (err) {
     assertError(err);
     if (isNodeError(err) && err.code !== "EEXIST") {

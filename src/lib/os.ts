@@ -1,6 +1,8 @@
 import { type IOType, spawn } from "node:child_process";
 import { type Enum } from "./types.ts";
 
+export const IS_WINDOWS = false; // TODO: Implement this when we try to run on windows.
+
 export function cwd(): string {
   return process.cwd();
 }

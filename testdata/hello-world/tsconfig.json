@@ -1,13 +1,4 @@
 {
-  "compilerOptions": {
-    "noEmit": true,
-    "target": "ESNext",
-    "module": "NodeNext",
-    "moduleResolution": "nodenext",
-    "strict": true,
-    "allowImportingTsExtensions": true
-  },
-  "include": [
-    "**/*.ts"
-  ]
+  "extends": "@buster/configs/tsconfig.json",
+  "include": ["**/*.ts"]
 }

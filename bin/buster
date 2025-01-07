@@ -218,6 +218,7 @@ buster_cli() {
     "${BUSTER_NODE_MODULES_PATH}/.bin/esbuild" "${BUSTER_SRC}/cli.ts" --log-level=error --format=esm --platform=node --bundle --sourcemap=external --external:vite "--outdir=${BUSTER_DIST}"
   fi
 
+  BUSTER_PATH="${BUSTER_PATH}" \
   BUSTER_PNPM_PATH="${BUSTER_PNPM_PATH}" \
   BUSTER_NODE_MODULES_PATH="${BUSTER_NODE_MODULES_PATH}" \
     ${BUSTER_NODE_EXE} "${BUSTER_DIST}/cli.js" ${@}
