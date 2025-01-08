@@ -241,6 +241,7 @@ case "${BUSTER_COMMAND}" in
   "install") buster_cli "${@}" ;;
   "gc") buster_gc "${@:2}" ;;
   "lint") buster_lint "${@:2}" ;;
+  "remove") buster_cli "${@}" ;;
   "run") buster_run "${@:2}" ;;
   "script") buster_script "${@:2}" ;;
   "serve") buster_serve "${@:2}" ;;

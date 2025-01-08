@@ -68,16 +68,7 @@ async function writePackageJson(): Promise<void> {
 
 async function writeTSConfig(): Promise<void> {
   const tsconfig = {
-    compilerOptions: {
-      noEmit: true,
-
-      target: "ESNext",
-      module: "NodeNext",
-      moduleResolution: "nodenext",
-
-      strict: true,
-      allowImportingTsExtensions: true,
-    },
+    extends: "@buster/configs/tsconfig.json",
     include: ["**/*.ts"],
   };
 

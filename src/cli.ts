@@ -2,6 +2,7 @@ import { logError } from "./lib/log.ts";
 import { exit } from "./lib/os.ts";
 import * as add from "./add.ts";
 import * as install from "./install.ts";
+import * as remove from "./remove.ts";
 
 const args = process.argv.slice(2);
 
@@ -15,6 +16,7 @@ interface CLICommand {
 const commands: Record<string, CLICommand> = {
   add,
   install,
+  remove,
 };
 
 if (args[0] !== undefined) {
