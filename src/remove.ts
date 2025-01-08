@@ -5,6 +5,7 @@ import { join } from "./lib/path.ts";
 
 export interface RemoveArgs {
   dependencies: string[];
+  directory?: string;
 }
 
 export function parse(args: string[]): RemoveArgs {
@@ -12,14 +13,24 @@ export function parse(args: string[]): RemoveArgs {
     positional: {
       key: "dependencies",
     },
-    options: {},
+    options: {
+      directory: {
+        keys: ["--dir"],
+        type: "string",
+      },
+    },
   });
 }
 
 export async function run(args: RemoveArgs): Promise<number> {
   const pnpmExePath = join([getPNPMPath(), "pnpm"]);
 
-  const result = await exec([pnpmExePath, "remove", ...args.dependencies], {
+  let options: string[] = [];
+  if (args.directory) {
+    options.push("--dir", args.directory);
+  }
+
+  const result = await exec([pnpmExePath, "remove", ...options, ...args.dependencies], {
     stdout: ExecIOMode.inherit,
     stderr: ExecIOMode.inherit,
   });
