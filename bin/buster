@@ -233,6 +233,11 @@ if [ ! "${BUSTER_COMMAND}" = "gc" ]; then
   PATH="${BUSTER_PATH}/bin:${PATH}"
 fi
 
+if [ "${BUSTER_COMMAND}" = "__init" ] && [ ! "${BUSTER_IS_RELEASE}" = "1" ]; then
+  mkdir -p "${BUSTER_DIST}"
+  "${BUSTER_NODE_MODULES_PATH}/.bin/esbuild" "${BUSTER_SRC}/*.ts" --log-level=error --format=esm --platform=node --bundle --sourcemap=external --external:vite "--outdir=${BUSTER_DIST}"
+fi
+
 case "${BUSTER_COMMAND}" in
   "add") buster_cli "${@}" ;;
   "bundle") buster_bundle "${@:2}" ;;
@@ -247,7 +252,7 @@ case "${BUSTER_COMMAND}" in
   "serve") buster_serve "${@:2}" ;;
   "test") buster_test "${@:2}" ;;
   *)
-    if [ ! "$@" = "" ]; then
+    if [ ! "$@" = "" ] && [ ! "$@" = "__init" ]; then
       buster_run "$@"
     else
       echo "Buster ${BUSTER_VERSION} (pew pew pew)"
