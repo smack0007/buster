@@ -1,6 +1,11 @@
 #!/bin/bash
 BUSTER_PATH="$(dirname $(realpath "${BASH_SOURCE[0]}"))"
 
+# If we're in CI we should be able to execute all tests without the src directory.
+if [ "${CI}" = "1" ]; then
+  rm -rf "${BUSTER_PATH}/src"
+fi
+
 BUSTER_COMMAND="${1:-}"
 
 if [[ "${BUSTER_COMMAND}" = "" || "${BUSTER_COMMAND}" = "unit" ]]; then

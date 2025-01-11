@@ -1,0 +1,2 @@
+# Exclude the lockfile from our test projects.
+pnpm-lock.json

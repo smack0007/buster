@@ -5,6 +5,7 @@ on:
     branches: [ main ]
 env:
   # For tput
+  CI: 1
   TERM: xterm
 jobs:
   test-with-node:
