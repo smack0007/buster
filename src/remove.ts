@@ -1,7 +1,7 @@
 import { parseArgs } from "./lib/args.ts";
-import { getPNPMPath } from "./lib/common.ts";
+import { getPNPMExe } from "./lib/common.ts";
 import { exec, ExecIOMode } from "./lib/os.ts";
-import { join } from "./lib/path.ts";
+import { symlinkBusterModule } from "./packageManager.ts";
 
 export interface RemoveArgs {
   dependencies: string[];
@@ -23,17 +23,21 @@ export function parse(args: string[]): RemoveArgs {
 }
 
 export async function run(args: RemoveArgs): Promise<number> {
-  const pnpmExePath = join([getPNPMPath(), "pnpm"]);
+  const pnpmExe = getPNPMExe();
 
   let options: string[] = [];
   if (args.directory) {
     options.push("--dir", args.directory);
   }
 
-  const result = await exec([pnpmExePath, "remove", ...options, ...args.dependencies], {
+  const result = await exec([pnpmExe, "remove", ...options, ...args.dependencies], {
     stdout: ExecIOMode.inherit,
     stderr: ExecIOMode.inherit,
   });
+
+  if (result.code === 0) {
+    await symlinkBusterModule(args.directory ?? ".");
+  }
 
   return result.code;
 }

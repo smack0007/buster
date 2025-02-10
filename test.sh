@@ -5,40 +5,20 @@ BUSTER_COMMAND="${1:-}"
 
 if [[ "${BUSTER_COMMAND}" = "" || "${BUSTER_COMMAND}" = "unit" ]]; then
   echo "=== Unit Tests ==="
-  pushd ${BUSTER_PATH} > /dev/null
-  ${BUSTER_PATH}/bin/buster test "${2:-*}"
+  pushd ${BUSTER_PATH}/src > /dev/null
+  ${BUSTER_PATH}/bin/buster test "${2:-**/*.test.ts}"
   if [ ! "$?" = "0" ]; then
     exit 1
   fi
   popd > /dev/null
 fi
 
-# If we're in CI we should be able to execute all integration tests without the src directory.
-if [ "${CI}" = "1" ]; then
-  rm -rf "${BUSTER_PATH}/src"
-fi
-
 if [[ "${BUSTER_COMMAND}" = "" || "${BUSTER_COMMAND}" = "int" ]]; then
   echo "=== Integration Tests ==="
-  BUSTER_TESTS_RESULT=0
-
   pushd ${BUSTER_PATH}/tests > /dev/null
-  for directory in ${2:-*}/ ; do
-    pushd $directory > /dev/null
-    echo $directory
-    for file in *.sh ; do
-      BUSTER_TEST_OUTPUT="$(/bin/bash "$file")"
-      if [ $? -eq 0 ]; then
-        echo "  ✔ $file"
-      else
-        echo "  ✖ $file"
-        echo "    ${BUSTER_TEST_OUTPUT}"
-        BUSTER_TESTS_RESULT=1
-      fi
-    done
-    popd > /dev/null
-  done
+  ${BUSTER_PATH}/bin/buster test "${2:-**/*.test.ts}"
+  if [ ! "$?" = "0" ]; then
+    exit 1
+  fi
   popd > /dev/null
-
-  exit ${BUSTER_TESTS_RESULT}
 fi

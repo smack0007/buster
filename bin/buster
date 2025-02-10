@@ -5,69 +5,33 @@ buster_calculateHash() {
   echo "$(md5sum $1 | cut -d " " -f 1)"
 }
 
-BUSTER_GREEN=`tput setaf 2`
-BUSTER_RED=`tput setaf 1`
-BUSTER_RESET=`tput sgr0`
-
-buster_logError() {
-  echo -e "${BUSTER_RED}error${BUSTER_RESET}: ${1}"
-}
-
 BUSTER_PATH="$(realpath $(dirname $(realpath "${BASH_SOURCE[0]}"))/..)"
-BUSTER_DIST=${BUSTER_PATH}/dist
 BUSTER_EXT=${BUSTER_PATH}/ext
 BUSTER_SRC=${BUSTER_PATH}/src
 BUSTER_TMP=${BUSTER_PATH}/tmp
 BUSTER_PLATFORM="$(echo "$(uname -s)-$(uname -m)" | tr '[:upper:]' '[:lower:]' | sed 's/x86_64/x64/')"
 BUSTER_VERSION="$(cat ${BUSTER_PATH}/package.json | grep "version" | cut -d ":" -f 2 | tr -d '", ')"
-BUSTER_COMMAND=${1:-}
 
-if command -v node > /dev/null; then
-  BUSTER_NODE_PATH="$(realpath $(dirname $(command -v node))/..)"
-  BUSTER_NODE_VERSION="$(node --version)"
-  BUSTER_NODE_IDENTIFIER="node-${BUSTER_NODE_VERSION}-${BUSTER_PLATFORM}"
-else
-  BUSTER_NODE_VERSION=v22.13.0
-  BUSTER_NODE_IDENTIFIER="node-${BUSTER_NODE_VERSION}-${BUSTER_PLATFORM}"
-  BUSTER_NODE_PATH="${BUSTER_EXT}/${BUSTER_NODE_IDENTIFIER}"
+BUSTER_NODE_VERSION=v22.13.1
+BUSTER_NODE_IDENTIFIER="node-${BUSTER_NODE_VERSION}-${BUSTER_PLATFORM}"
+BUSTER_NODE_PATH="${BUSTER_EXT}/${BUSTER_NODE_IDENTIFIER}"
+BUSTER_NODE_OPTIONS="--disable-warning=ExperimentalWarning --experimental-transform-types"
+BUSTER_NODE_EXE="${BUSTER_NODE_PATH}/bin/node ${BUSTER_NODE_OPTIONS}"
 
-  # If we're handling node ourselves then add it to the path.
-  PATH="${BUSTER_NODE_PATH}/bin:${PATH}"
-fi
-
-BUSTER_NODE_EXE="${BUSTER_NODE_PATH}/bin/node --enable-source-maps"
-
+BUSTER_PNPM_VERSION=v10.2.1
 BUSTER_PNPM_PLATFORM="$(echo "${BUSTER_PLATFORM}" | sed 's/darwin/macos/')"
-if command -v pnpm > /dev/null; then
-  BUSTER_PNPM_PATH="$(realpath $(dirname $(command -v pnpm)))"
-  BUSTER_PNPM_VERSION="v$(pnpm --version)"
-  BUSTER_PNPM_IDENTIFIER="pnpm-${BUSTER_PNPM_VERSION}-${BUSTER_PNPM_PLATFORM}"
-else
-  BUSTER_PNPM_VERSION=v9.15.3
-  BUSTER_PNPM_IDENTIFIER="pnpm-${BUSTER_PNPM_VERSION}-${BUSTER_PNPM_PLATFORM}"
-  BUSTER_PNPM_PATH="${BUSTER_EXT}/${BUSTER_PNPM_IDENTIFIER}"
-
-  # If we're handling pnpm ourselves then add it to the path.
-  PATH="${BUSTER_PNPM_PATH}:${PATH}"
-fi
-
+BUSTER_PNPM_IDENTIFIER="pnpm-${BUSTER_PNPM_VERSION}-${BUSTER_PNPM_PLATFORM}"
+BUSTER_PNPM_PATH="${BUSTER_EXT}/${BUSTER_PNPM_IDENTIFIER}"
 BUSTER_PNPM_EXE="${BUSTER_PNPM_PATH}/pnpm"
 
 BUSTER_NODE_MODULES_IDENTIFIER="${BUSTER_NODE_IDENTIFIER}-$(buster_calculateHash "${BUSTER_PATH}/package.json")"
 BUSTER_NODE_MODULES_PATH="${BUSTER_PATH}/node_modules"
-BUSTER_OXLINT_EXE="${BUSTER_NODE_MODULES_PATH}/.bin/oxlint"
 
 BUSTER_VERBOSE=${BUSTER_VERBOSE:-0}
 
 BUSTER_IS_RELEASE=${BUSTER_IS_RELEASE:-0}
 if [ ! -d "${BUSTER_SRC}" ]; then
   BUSTER_IS_RELEASE=1
-fi
-
-# Ensure ext and remove tmp if it exists
-mkdir -p ${BUSTER_EXT}
-if [ -d "${BUSTER_TMP}" ]; then
-  rm -rf "${BUSTER_TMP}"
 fi
 
 buster_download() {
@@ -122,143 +86,21 @@ buster_ensureNodeModules() {
   fi
 }
 
-# Compiles ts files from the src folder
-buster_compileSelf() {
-  local fileNameWihtoutExtension="$(basename -s .ts $1)"
-  local distFilePath="${BUSTER_DIST}/${fileNameWihtoutExtension}.js"
-  
-  if [ ! "${BUSTER_IS_RELEASE}" = "1" ]; then
-    mkdir -p ${BUSTER_DIST}
-    ${BUSTER_NODE_MODULES_PATH}/.bin/esbuild ${BUSTER_SRC}/$1 --log-level=error --format=esm --platform=node --bundle --sourcemap=external --external:vite --outfile=${distFilePath}
-  fi
-  
-  echo "$distFilePath"
-}
+# Ensure ext directory
+mkdir -p ${BUSTER_EXT}
 
-buster_invoke() {  
-  local distFilePath="$(buster_compileSelf $1)"
+buster_ensureNode
+buster_ensurePNPM
+buster_ensureNodeModules
 
-  BUSTER_NODE_MODULES_PATH=${BUSTER_NODE_MODULES_PATH} \
-    ${BUSTER_NODE_EXE} ${distFilePath} ${@:2}
-}
+# Ensure everything is available via the PATH variable.
+PATH="${BUSTER_NODE_PATH}/bin:${PATH}"
+PATH="${BUSTER_PNPM_PATH}:${PATH}"
+PATH="${BUSTER_PATH}/bin:${PATH}"
 
-buster_symlinkModules() {
-  buster_invoke "symlinkModules.ts" "$@"
-}
-
-buster_bundle() {
-  buster_invoke "bundle.ts" "$@" 
-}
-
-buster_check() {
-  if [ "${1:-}" = "" ]; then
-    if [ -f "tsconfig.json" ]; then 
-      ${BUSTER_NODE_MODULES_PATH}/.bin/tsc --noEmit -p "tsconfig.json"
-    else
-      buster_logError "The current directory does not contain a 'tsconfig.json' file. Not sure what to check."
-    fi
-  elif [ -d "${1:-}" ]; then
-    if [ -f "${1}/tsconfig.json" ]; then 
-      ${BUSTER_NODE_MODULES_PATH}/.bin/tsc --noEmit -p "${1}/tsconfig.json" ${@:2}
-    else
-      buster_logError "'${1}' is a directory and '${1}/tsconfig.json' does not exist. Not sure what to check."
-    fi
-  elif [ -f "${1:-}" ]; then
-    buster_logError "'${1}' is a file and check expects the directory of your project to be provided."
-  else
-    buster_logError "Unknown error."
-  fi
-}
-
-buster_init() {
-  buster_invoke "init.ts" "$@"
-  buster_symlinkModules "$@"
-}
-
-buster_gc() {
-  local command="${1:-}"
-
-  case $command in
-    "ext") rm -rf "${BUSTER_EXT}" ;;
-    *)
-      rm -rf "${BUSTER_EXT}"
-      ;;
-  esac
-}
-
-buster_lint() {
-  ${BUSTER_OXLINT_EXE} $@
-}
-
-buster_run() {
-  local importFlag="--import $(buster_compileSelf "node-register.ts")"
-  local hooksPath="$(buster_compileSelf "node-hooks.ts")"
-  
-  BUSTER_NODE_HOOKS_PATH=${hooksPath} \
-  BUSTER_NODE_MODULES_PATH=${BUSTER_NODE_MODULES_PATH} \
-    ${BUSTER_NODE_EXE} ${importFlag} $@
-}
-
-buster_script() {
-  buster_invoke "script.ts" "$@" 
-}
-
-buster_serve() {
-  buster_invoke "serve.ts" "$@" 
-}
-
-buster_test() {
-  local name="${1:-*}"
-  buster_run "--test **/$name.test.ts **/$name.spec.ts ${@:2}"
-}
-
-buster_cli() {
-  if [ ! "${BUSTER_IS_RELEASE}" = "1" ]; then
-    mkdir -p "${BUSTER_DIST}"
-    "${BUSTER_NODE_MODULES_PATH}/.bin/esbuild" "${BUSTER_SRC}/cli.ts" --log-level=error --format=esm --platform=node --bundle --sourcemap=external --external:vite "--outdir=${BUSTER_DIST}"
-  fi
-
-  BUSTER_PATH="${BUSTER_PATH}" \
-  BUSTER_PNPM_PATH="${BUSTER_PNPM_PATH}" \
-  BUSTER_NODE_MODULES_PATH="${BUSTER_NODE_MODULES_PATH}" \
-    ${BUSTER_NODE_EXE} "${BUSTER_DIST}/cli.js" ${@}
-}
-
-if [ ! "${BUSTER_COMMAND}" = "gc" ]; then
-  buster_ensureNode
-  buster_ensurePNPM
-  buster_ensureNodeModules
-
-  # buster calls back to itself sometimes so ensure it's on the PATH
-  PATH="${BUSTER_PATH}/bin:${PATH}"
-fi
-
-if [ "${BUSTER_COMMAND}" = "__init" ] && [ ! "${BUSTER_IS_RELEASE}" = "1" ]; then
-  mkdir -p "${BUSTER_DIST}"
-  "${BUSTER_NODE_MODULES_PATH}/.bin/esbuild" "${BUSTER_SRC}/*.ts" --log-level=error --format=esm --platform=node --bundle --sourcemap=external --external:vite "--outdir=${BUSTER_DIST}"
-fi
-
-case "${BUSTER_COMMAND}" in
-  "add") buster_cli "${@}" ;;
-  "bundle") buster_bundle "${@:2}" ;;
-  "check") buster_check "${@:2}" ;;
-  "init") buster_init "${@:2}" ;;
-  "install") buster_cli "${@}" ;;
-  "gc") buster_gc "${@:2}" ;;
-  "lint") buster_lint "${@:2}" ;;
-  "remove") buster_cli "${@}" ;;
-  "run") buster_run "${@:2}" ;;
-  "script") buster_script "${@:2}" ;;
-  "serve") buster_serve "${@:2}" ;;
-  "test") buster_test "${@:2}" ;;
-  *)
-    if [ ! "$@" = "" ] && [ ! "$@" = "__init" ]; then
-      buster_run "$@"
-    else
-      echo "Buster ${BUSTER_VERSION} (pew pew pew)"
-      echo "  node ${BUSTER_NODE_VERSION} ${BUSTER_NODE_EXE}"
-      echo "  pnpm ${BUSTER_PNPM_VERSION} ${BUSTER_PNPM_EXE}"
-    fi
-    ;;
-esac
+BUSTER_PATH="${BUSTER_PATH}" \
+BUSTER_NODE_PATH="${BUSTER_NODE_PATH}" \
+BUSTER_PNPM_PATH="${BUSTER_PNPM_PATH}" \
+BUSTER_NODE_MODULES_PATH="${BUSTER_NODE_MODULES_PATH}" \
+  ${BUSTER_NODE_EXE} "${BUSTER_SRC}/cli.ts" ${@}
 

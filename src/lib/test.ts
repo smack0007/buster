@@ -1,7 +1,7 @@
-import { AssertionError, deepStrictEqual, strictEqual } from "node:assert";
+import assert, { AssertionError, deepStrictEqual, strictEqual } from "node:assert";
 import { isObject } from "./utils.ts";
 
-export { describe, it } from "node:test";
+export { afterEach, beforeEach, describe, it } from "node:test";
 
 class Expect<T> {
   private readonly isObject;
@@ -16,6 +16,14 @@ class Expect<T> {
     } else {
       strictEqual(this.value, other, message);
     }
+  }
+
+  public toBeTrue(message?: string): void {
+    assert(this.value === true, message ?? `Expected ${this.value} to be true.`);
+  }
+
+  public toBeFalse(message?: string): void {
+    assert(this.value === false, message ?? `Expected ${this.value} to be false.`);
   }
 }
 

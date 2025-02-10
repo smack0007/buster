@@ -1,19 +1,46 @@
 import { exists, symlink } from "./fs.ts";
 import { logError } from "./log.ts";
 import { exit } from "./os.ts";
+import { join } from "./path.ts";
 import type { Enum } from "./types.ts";
 import { throwError } from "./utils.ts";
 
+export const BUSTER_NODE_OPTIONS = ["--disable-warning=ExperimentalWarning", "--experimental-transform-types"] as const;
+
 export function getBusterPath(): string {
   return process.env["BUSTER_PATH"] ?? throwError("BUSTER_PATH was not defined.");
+}
+
+export function getBusterTmpPath(): string {
+  return join([getBusterPath(), "tmp"]);
+}
+
+export function getNodePath(): string {
+  return process.env["BUSTER_NODE_PATH"] ?? throwError("BUSTER_NODE_PATH was not defined.");
+}
+
+export function getNodeExe(): string {
+  return join([getNodePath(), "bin", "node"]);
 }
 
 export function getPNPMPath(): string {
   return process.env["BUSTER_PNPM_PATH"] ?? throwError("BUSTER_PNPM_PATH was not defined.");
 }
 
+export function getPNPMExe(): string {
+  return join([getPNPMPath(), "pnpm"]);
+}
+
 export function getNodeModulesPath(): string {
   return process.env["BUSTER_NODE_MODULES_PATH"] ?? throwError("BUSTER_NODE_MODULES_PATH was not defined.");
+}
+
+export function getOxlintExe(): string {
+  return join([getNodeModulesPath(), ".bin", "oxlint"]);
+}
+
+export function getTSCExe(): string {
+  return join([getNodeModulesPath(), ".bin", "tsc"]);
 }
 
 export const ProjectType = {

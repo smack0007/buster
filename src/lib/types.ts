@@ -2,6 +2,10 @@
 // Util Types
 //
 
+export type ArrayMinLength<T, N extends number, Current extends T[] = []> = Current["length"] extends N
+  ? [...Current, ...T[]]
+  : ArrayMinLength<T, N, [...Current, T]>;
+
 export type ArrayValues<T extends readonly unknown[]> = T[number];
 
 export type DeepReadonly<T> = { readonly [P in keyof T]: DeepReadonly<T[P]> };
@@ -26,6 +30,8 @@ export interface PackageJson {
   type?: "module" | "commonjs";
 
   main?: string;
+
+  dependencies?: Record<string, string>;
 
   scripts?: Record<string, string>;
 }

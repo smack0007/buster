@@ -1,7 +1,11 @@
 import { type IOType, spawn } from "node:child_process";
-import { type Enum } from "./types.ts";
+import { type ArrayMinLength, type Enum } from "./types.ts";
 
 export const IS_WINDOWS = false; // TODO: Implement this when we try to run on windows.
+
+export function chdir(directory: string): void {
+  return process.chdir(directory);
+}
 
 export function cwd(): string {
   return process.cwd();
@@ -39,7 +43,7 @@ function mapExecIOMode(value: ExecIOMode | undefined): IOType {
   }
 }
 
-export function exec(args: [string, ...string[]], options: ExecOptions = {}): Promise<ExecResult> {
+export function exec(args: ArrayMinLength<string, 1>, options: ExecOptions = {}): Promise<ExecResult> {
   return new Promise((resolve, reject) => {
     try {
       const process = spawn(args[0], args.slice(1), {
