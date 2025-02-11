@@ -1,5 +1,5 @@
 import { parseArgs } from "./lib/args.ts";
-import { BUSTER_NODE_OPTIONS, getNodeExe } from "./lib/common.ts";
+import { getNodeExe, getNodeOptions } from "./lib/common.ts";
 import { exec, ExecIOMode } from "./lib/os.ts";
 
 export interface TestArgs {
@@ -29,7 +29,7 @@ export async function run(args: TestArgs): Promise<number> {
     args.testArgs[0] = "**/*.test.ts";
   }
 
-  const result = await exec([nodeExe, ...BUSTER_NODE_OPTIONS, ...BUSTER_TEST_OPTIONS, ...args.testArgs], {
+  const result = await exec([nodeExe, ...getNodeOptions(), ...BUSTER_TEST_OPTIONS, ...args.testArgs], {
     stdout: ExecIOMode.inherit,
     stderr: ExecIOMode.inherit,
   });

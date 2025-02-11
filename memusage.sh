@@ -1,7 +1,10 @@
 #!/bin/bash
 
-echo "node --disable-warning=ExperimentalWarning --experimental-transform-types ./testdata/hello-world"
-/usr/bin/time -f "%M" ./ext/node-v22.13.1-linux-x64/bin/node --disable-warning=ExperimentalWarning --experimental-transform-types ./testdata/hello-world
+BUSTER_PATH="$(dirname $(realpath "${BASH_SOURCE[0]}"))"
+source "${BUSTER_PATH}/buster.env"
+
+echo "node ${BUSTER_NODE_OPTIONS} ./testdata/hello-world"
+/usr/bin/time -f "%M" ./ext/node-${BUSTER_NODE_VERSION}-linux-x64/bin/node ${BUSTER_NODE_OPTIONS} ./testdata/hello-world
 
 echo "buster run ./testdata/hello-world"
 /usr/bin/time -f "%M" buster run ./testdata/hello-world

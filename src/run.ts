@@ -1,5 +1,5 @@
 import { parseArgs } from "./lib/args.ts";
-import { BUSTER_NODE_OPTIONS, getNodeExe } from "./lib/common.ts";
+import { getNodeExe, getNodeOptions } from "./lib/common.ts";
 import { exec, ExecIOMode } from "./lib/os.ts";
 
 export interface RunArgs {
@@ -18,7 +18,7 @@ export function parse(args: string[]): RunArgs {
 export async function run(args: RunArgs): Promise<number> {
   const nodeExe = getNodeExe();
 
-  const result = await exec([nodeExe, ...BUSTER_NODE_OPTIONS, ...args.scriptArgs], {
+  const result = await exec([nodeExe, ...getNodeOptions(), ...args.scriptArgs], {
     stdout: ExecIOMode.inherit,
     stderr: ExecIOMode.inherit,
   });

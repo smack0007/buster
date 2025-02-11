@@ -6,8 +6,6 @@ export async function printVersionInformation(): Promise<void> {
   const packageJson = await loadPackageJson(join([getBusterPath(), "package.json"]));
 
   console.info(`Buster ${packageJson.version} (pew pew pew)`);
-
-  // TODO:
-  // echo "  node ${BUSTER_NODE_VERSION} ${BUSTER_NODE_EXE}"
-  // echo "  pnpm ${BUSTER_PNPM_VERSION} ${BUSTER_PNPM_EXE}"
+  console.info(`  node ${process.env["BUSTER_NODE_VERSION"]}`);
+  console.info(`  pnpm ${process.env["BUSTER_PNPM_VERSION"]}`);
 }

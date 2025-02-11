@@ -23,6 +23,10 @@ export function getNodeExe(): string {
   return join([getNodePath(), "bin", "node"]);
 }
 
+export function getNodeOptions(): string[] {
+  return process.env["BUSTER_NODE_OPTIONS"]?.split(" ") ?? throwError("BUSTER_NODE_OPTIONS was not defined.");
+}
+
 export function getPNPMPath(): string {
   return process.env["BUSTER_PNPM_PATH"] ?? throwError("BUSTER_PNPM_PATH was not defined.");
 }
