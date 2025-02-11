@@ -9,6 +9,7 @@ import * as remove from "./remove.ts";
 import * as run from "./run.ts";
 import * as script from "./script.ts";
 import * as test from "./test.ts";
+import { printVersionInformation } from "./version.ts";
 
 const args = process.argv.slice(2);
 
@@ -32,6 +33,11 @@ const commands: Record<string, CLICommand> = {
 };
 
 if (args[0] !== undefined) {
+  if (args[0] === "--version") {
+    await printVersionInformation();
+    exit(0);
+  }
+
   const command = commands[args[0]];
 
   if (!command) {

@@ -3,7 +3,7 @@ set -eu
 BUSTER_PATH="$(dirname $(realpath "${BASH_SOURCE[0]}"))"
 
 # Calling buster like this will install everything.
-BUSTER_VERBOSE=1 ${BUSTER_PATH}/bin/buster
+BUSTER_VERBOSE=1 ${BUSTER_PATH}/bin/buster --version
 
 echo "=== clicker ==="
 cd "${BUSTER_PATH}/testdata/clicker"

@@ -25,7 +25,7 @@ export interface PackageJson {
 
   description?: string;
 
-  verstion?: string;
+  version?: string;
 
   type?: "module" | "commonjs";
 
