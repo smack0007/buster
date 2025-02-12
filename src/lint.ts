@@ -1,6 +1,6 @@
 import { parseArgs } from "./lib/args.ts";
-import { getOxlintExe } from "./lib/common.ts";
-import { cwd, exec, ExecIOMode } from "./lib/os.ts";
+import { getOxlintExe, signalReplaceProcessAndExit } from "./lib/common.ts";
+import { cwd } from "./lib/os.ts";
 import { resolve } from "./lib/path.ts";
 
 export interface LintArgs {
@@ -22,10 +22,7 @@ export async function run(args: LintArgs): Promise<number> {
 
   let path = resolve(args.path ?? cwd());
 
-  const result = await exec([oxlintExe, path], {
-    stdout: ExecIOMode.inherit,
-    stderr: ExecIOMode.inherit,
-  });
+  await signalReplaceProcessAndExit([oxlintExe, path]);
 
-  return result.code;
+  return 0;
 }

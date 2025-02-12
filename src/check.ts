@@ -1,7 +1,7 @@
 import { parseArgs } from "./lib/args.ts";
-import { getTSCExe } from "./lib/common.ts";
+import { getTSCExe, signalReplaceProcessAndExit } from "./lib/common.ts";
 import { exists, isDirectory } from "./lib/fs.ts";
-import { cwd, exec, ExecIOMode } from "./lib/os.ts";
+import { cwd } from "./lib/os.ts";
 import { join, resolve } from "./lib/path.ts";
 
 export interface CheckArgs {
@@ -28,10 +28,7 @@ export async function run(args: CheckArgs): Promise<number> {
     }
   }
 
-  const result = await exec([tscExe, "--noEmit", "-p", path], {
-    stdout: ExecIOMode.inherit,
-    stderr: ExecIOMode.inherit,
-  });
+  await signalReplaceProcessAndExit([tscExe, "--noEmit", "-p", path]);
 
-  return result.code;
+  return 0;
 }

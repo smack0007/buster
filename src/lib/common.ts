@@ -1,8 +1,8 @@
-import { exists, symlink } from "./fs.ts";
+import { exists, symlink, writeTextFile } from "./fs.ts";
 import { logError } from "./log.ts";
 import { exit } from "./os.ts";
 import { join } from "./path.ts";
-import type { Enum } from "./types.ts";
+import type { ArrayMinLength, Enum } from "./types.ts";
 import { throwError } from "./utils.ts";
 
 export const BUSTER_NODE_OPTIONS = ["--disable-warning=ExperimentalWarning", "--experimental-transform-types"] as const;
@@ -68,6 +68,13 @@ export function ensureProjectType(type: string | undefined): ProjectType {
   }
 
   return type as ProjectType;
+}
+
+export async function signalReplaceProcessAndExit(args: ArrayMinLength<string, 1>): Promise<never> {
+  const replacementSignal =
+    process.env["BUSTER_REPLACE_SIGNAL"] ?? throwError("BUSTER_REPLACE_SIGNAL was not defined.");
+  await writeTextFile(replacementSignal, args.join(" "));
+  exit(0);
 }
 
 export async function trySymlink(target: string, path: string): Promise<void> {

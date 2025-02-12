@@ -1,6 +1,5 @@
 import { parseArgs } from "./lib/args.ts";
-import { getNodeExe, getNodeOptions } from "./lib/common.ts";
-import { exec, ExecIOMode } from "./lib/os.ts";
+import { signalReplaceProcessAndExit, getNodeExe, getNodeOptions } from "./lib/common.ts";
 
 export interface RunArgs {
   scriptArgs: string[];
@@ -18,10 +17,7 @@ export function parse(args: string[]): RunArgs {
 export async function run(args: RunArgs): Promise<number> {
   const nodeExe = getNodeExe();
 
-  const result = await exec([nodeExe, ...getNodeOptions(), ...args.scriptArgs], {
-    stdout: ExecIOMode.inherit,
-    stderr: ExecIOMode.inherit,
-  });
+  await signalReplaceProcessAndExit([nodeExe, ...getNodeOptions(), ...args.scriptArgs]);
 
-  return result.code;
+  return 0;
 }
