@@ -8,6 +8,7 @@ import * as lint from "./lint.ts";
 import * as remove from "./remove.ts";
 import * as run from "./run.ts";
 import * as script from "./script.ts";
+import * as serve from "./serve.ts";
 import * as test from "./test.ts";
 import { printVersionInformation } from "./version.ts";
 
@@ -17,7 +18,7 @@ type CLICommandArgs = any;
 
 interface CLICommand {
   parse: (args: string[]) => CLICommandArgs;
-  run: (args: CLICommandArgs) => Promise<number>;
+  run: (args: CLICommandArgs) => Promise<number | undefined>;
 }
 
 const commands: Record<string, CLICommand> = {
@@ -29,6 +30,7 @@ const commands: Record<string, CLICommand> = {
   remove,
   run,
   script,
+  serve,
   test,
 };
 
@@ -46,7 +48,11 @@ if (args[0] !== undefined) {
   }
 
   try {
-    exit(await command.run(command.parse(args.slice(1))));
+    const result = await command.run(command.parse(args.slice(1)));
+
+    if (result !== undefined) {
+      exit(result);
+    }
   } catch (err) {
     logError("An unexpected error occured.", err);
     exit(1);
