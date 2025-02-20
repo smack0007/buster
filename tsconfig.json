@@ -32,5 +32,5 @@
       "@buster/*": ["lib/*"]
     }
   },
-  "include": ["**/*.ts"]
+  "include": ["lib/**/*.ts", "src/**/*.ts", "tests/**/*.ts"]
 }
