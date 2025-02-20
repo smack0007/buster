@@ -1,8 +1,8 @@
+import { afterEach, beforeEach, expect, it } from "@buster/test";
 import { getBusterPath, getBusterTmpPath } from "../src/lib/common.ts";
 import { exists, removeDirectory } from "../src/lib/fs.ts";
 import { chdir, exec } from "../src/lib/os.ts";
 import { join } from "../src/lib/path.ts";
-import { afterEach, beforeEach, expect, it } from "../src/lib/test.ts";
 import { type ArrayMinLength } from "../src/lib/types.ts";
 
 export const BUSTER_TMP_PATH = getBusterTmpPath();

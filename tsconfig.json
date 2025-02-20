@@ -25,7 +25,12 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
 
-    "lib": ["es2023"]
+    "lib": ["es2023"],
+
+    "baseUrl": ".",
+    "paths": {
+      "@buster/*": ["lib/*"]
+    }
   },
-  "include": ["src/**/*.ts"]
+  "include": ["**/*.ts"]
 }

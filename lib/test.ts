@@ -1,7 +1,10 @@
 import assert, { AssertionError, deepStrictEqual, strictEqual } from "node:assert";
-import { isObject } from "./utils.ts";
 
 export { afterEach, beforeEach, describe, it } from "node:test";
+
+function isObject(value: unknown): value is {} {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
 
 class Expect<T> {
   private readonly isObject;

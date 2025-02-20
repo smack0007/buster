@@ -24,7 +24,16 @@ export function getNodeExe(): string {
 }
 
 export function getNodeOptions(): string[] {
-  return process.env["BUSTER_NODE_OPTIONS"]?.split(" ") ?? throwError("BUSTER_NODE_OPTIONS was not defined.");
+  const busterPath = getBusterPath();
+
+  const result = process.env["BUSTER_NODE_OPTIONS"]?.split(" ") ?? throwError("BUSTER_NODE_OPTIONS was not defined.");
+
+  result.push(`--env-file=${busterPath}/buster.env`);
+
+  result.push("--import");
+  result.push(`${busterPath}/src/node-register.ts`);
+
+  return result;
 }
 
 export function getPNPMPath(): string {
