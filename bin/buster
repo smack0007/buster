@@ -109,6 +109,8 @@ BUSTER_NODE_MODULES_PATH="${BUSTER_NODE_MODULES_PATH}" \
 BUSTER_REPLACE_SIGNAL="${BUSTER_REPLACE_SIGNAL}" \
   ${BUSTER_NODE_EXE} ${BUSTER_NODE_OPTIONS} "${BUSTER_CLI_ENTRY_POINT}" ${@}
 
+# If the file ${BUSTER_REPLACE_SIGNAL} has been written to, then the command
+# written to that files should take over execution. 
 if [ -f "${BUSTER_REPLACE_SIGNAL}" ]; then
   BUSTER_REPLACEMENT_PROCESS="$(cat "${BUSTER_REPLACE_SIGNAL}")"
   rm "${BUSTER_REPLACE_SIGNAL}"

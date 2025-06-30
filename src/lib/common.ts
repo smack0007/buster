@@ -11,6 +11,10 @@ export function getBusterPath(): string {
   return process.env["BUSTER_PATH"] ?? throwError("BUSTER_PATH was not defined.");
 }
 
+export function getBusterExtPath(): string {
+  return join([getBusterPath(), "ext"]);
+}
+
 export function getBusterTmpPath(): string {
   return join([getBusterPath(), "tmp"]);
 }

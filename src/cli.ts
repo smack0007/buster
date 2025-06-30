@@ -2,6 +2,7 @@ import { logError } from "./lib/log.ts";
 import { exit } from "./lib/os.ts";
 import * as add from "./add.ts";
 import * as check from "./check.ts";
+import * as gc from "./gc.ts";
 import * as init from "./init.ts";
 import * as install from "./install.ts";
 import * as lint from "./lint.ts";
@@ -24,6 +25,7 @@ interface CLICommand {
 const commands: Record<string, CLICommand> = {
   add,
   check,
+  gc,
   init,
   install,
   lint,
