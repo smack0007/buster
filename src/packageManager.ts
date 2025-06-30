@@ -4,6 +4,6 @@ import { join } from "./lib/path.ts";
 
 export async function symlinkBusterModule(projectPath: string): Promise<void> {
   const busterPath = getBusterPath();
-  await ensureDirectory(join([projectPath, "node_modules", "@buster"]));
-  await trySymlink(join([busterPath, "configs"]), join([projectPath, "node_modules", "@buster", "configs"]));
+  await ensureDirectory(join([projectPath, "node_modules"]));
+  await trySymlink(join([busterPath, "lib"]), join([projectPath, "node_modules", "@buster"]));
 }

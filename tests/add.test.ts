@@ -1,5 +1,5 @@
+import { describe, expect, it } from "@buster/test";
 import { CLICKER_PATH, HELLO_WORLD_PATH, setupIntegrationTest } from "./integrationTest.ts";
-import { describe, expect, it } from "../src/lib/test.ts";
 import { chdir, exec } from "../src/lib/os.ts";
 import { exists, tryRemoveDirectory, tryRemoveFile } from "../src/lib/fs.ts";
 import { type ArrayMinLength } from "../src/lib/types.ts";

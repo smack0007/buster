@@ -1,4 +1,4 @@
-import { beforeEach, describe } from "../src/lib/test.ts";
+import { beforeEach, describe } from "@buster/test";
 import {
   BUSTER_TESTDATA_PATH,
   HELLO_WORLD_PATH,

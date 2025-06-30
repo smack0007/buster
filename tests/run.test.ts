@@ -1,3 +1,4 @@
+import { describe } from "@buster/test";
 import {
   BUSTER_TESTDATA_PATH,
   HELLO_WORLD_PATH,
@@ -5,7 +6,6 @@ import {
   testCode0AndExpectedOutput,
 } from "./integrationTest.ts";
 import { join } from "../src/lib/path.ts";
-import { describe } from "../src/lib/test.ts";
 
 describe("run", async () => {
   setupIntegrationTest();

@@ -1,15 +1,16 @@
 import { beforeEach, describe } from "@buster/test";
 import { HELLO_WORLD_PATH, setupIntegrationTest, testCode0 } from "./integrationTest.ts";
-import { chdir } from "../src/lib/os.ts";
+import { chdir, exec } from "../src/lib/os.ts";
 
-describe("lint", async () => {
+describe("test", async () => {
   setupIntegrationTest();
 
   describe("cwd", () => {
-    beforeEach(() => {
+    beforeEach(async () => {
       chdir(HELLO_WORLD_PATH);
+      await exec(["buster", "install"]);
     });
 
-    testCode0([["without path", ["buster", "lint"]]]);
+    testCode0([["without args", ["buster", "test"]]]);
   });
 });
