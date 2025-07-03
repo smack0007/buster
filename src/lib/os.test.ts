@@ -9,7 +9,7 @@ describe("os.ts", () => {
     });
 
     it("can capture stderr", async () => {
-      const result = await exec(["awk", ' BEGIN { print "foo" > "/dev/fd/2" }']);
+      const result = await exec(["awk", ' BEGIN { print "foo" > "/dev/stderr" }']);
       expect(result.stderr).toEqual("foo\n");
     });
   });
