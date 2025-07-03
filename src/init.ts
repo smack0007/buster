@@ -89,12 +89,7 @@ tmp/
   }
 
   async function writeOxlintRC(): Promise<void> {
-    const oxlintrc = {
-      plugins: ["typescript"],
-      rules: {
-        "@typescript-eslint/explicit-function-return-type": "error",
-      },
-    };
+    const oxlintrc = { extends: "./node_modules/@buster/configs/.oxlintrc.json" };
 
     const oxlintrcPath = join([path, ".oxlintrc.json"]);
     if (!(await exists(oxlintrcPath))) {
