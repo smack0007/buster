@@ -2,7 +2,7 @@
 set -e
 . "$(dirname $(realpath "${BASH_SOURCE[0]}"))/buster.env"
 
-DOCKER_FLAGS="--rm -v $(realpath ${BUSTER_REPO_PATH}):/app -v /app/ext -v /app/node_modules ${DOCKER_FLAGS}"
+DOCKER_FLAGS="--rm -v ${BUSTER_REPO_PATH}:/app -v /app/ext -v /app/node_modules ${DOCKER_FLAGS}"
 
 if [[ ! "${DOCKER_FLAGS}" == *" -w "* ]]; then
   DOCKER_FLAGS="${DOCKER_FLAGS} -w /app"
@@ -13,7 +13,7 @@ if [[ ! "${CI}" = "1" ]]; then
 fi
 
 DOCKER_INIT_CMD="ln -s /usr/local/buster/ext/* /app/ext/ && ln -s /usr/local/buster/node_modules/* /app/node_modules/ && ln -s /usr/local/buster/node_modules/.bin /app/node_modules/.bin"
-if [[ "${CI}" = "1" ]]; then
+if [ ! -e "${BUSTER_REPO_PATH}/node_modules.version" ]; then
 	DOCKER_INIT_CMD="${DOCKER_INIT_CMD} && ln -s /usr/local/buster/node_modules.version /app/node_modules.version"
 fi
 
