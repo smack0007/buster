@@ -1,6 +1,6 @@
 {
   "name": "buster",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "type": "module",
   "dependencies": {
     "@types/node": "22.15.34",
