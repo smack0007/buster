@@ -12,7 +12,12 @@ if [[ ! "${CI}" = "1" ]]; then
   DOCKER_FLAGS="${DOCKER_FLAGS} -it"
 fi
 
+DOCKER_INIT_CMD="ln -s /usr/local/buster/ext/* /app/ext/ && ln -s /usr/local/buster/node_modules/* /app/node_modules/ && ln -s /usr/local/buster/node_modules/.bin /app/node_modules/.bin"
+if [[ "${CI}" = "1" ]]; then
+	DOCKER_INIT_CMD="${DOCKER_INIT_CMD} && ln -s /usr/local/buster/node_modules.version /app/node_modules.version"
+fi
+
 DOCKER_CMD=${1:-/bin/bash}
 
 cd ${BUSTER_REPO_PATH}
-docker run ${DOCKER_FLAGS} ${BUSTER_CONTAINER_NAME}:${BUSTER_CONTAINER_TAG} /bin/bash -c "ln -s /usr/local/buster/ext/* /app/ext/ && ln -s /usr/local/buster/node_modules/* /app/node_modules/ && ln -s /usr/local/buster/node_modules/.bin /app/node_modules/.bin && ${DOCKER_CMD}"
+docker run ${DOCKER_FLAGS} ${BUSTER_CONTAINER_NAME}:${BUSTER_CONTAINER_TAG} /bin/bash -c "${DOCKER_INIT_CMD} && ${DOCKER_CMD}"
