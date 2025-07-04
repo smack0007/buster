@@ -12,7 +12,7 @@ if [[ ! "${CI}" = "1" ]]; then
   DOCKER_FLAGS="${DOCKER_FLAGS} -it"
 fi
 
-DOCKER_INIT_CMD="ln -s /usr/local/buster/ext/* /app/ext/ && ln -s /usr/local/buster/node_modules/* /app/node_modules/ && ln -s /usr/local/buster/node_modules/.bin /app/node_modules/.bin"
+DOCKER_INIT_CMD="ln -s /usr/local/buster/ext/* /app/ext/ && ln -s /usr/local/buster/node_modules/* /app/node_modules/ && ln -s /usr/local/buster/node_modules/.bin /app/node_modules/.bin && ln -s /usr/local/buster/node_modules/.pnpm /app/node_modules/.pnpm"
 DOCKER_CMD=${1:-/bin/bash}
 
 cd ${BUSTER_REPO_PATH}
