@@ -13,10 +13,6 @@ if [[ ! "${CI}" = "1" ]]; then
 fi
 
 DOCKER_INIT_CMD="ln -s /usr/local/buster/ext/* /app/ext/ && ln -s /usr/local/buster/node_modules/* /app/node_modules/ && ln -s /usr/local/buster/node_modules/.bin /app/node_modules/.bin"
-if [ ! -e "${BUSTER_REPO_PATH}/node_modules.version" ]; then
-	DOCKER_INIT_CMD="${DOCKER_INIT_CMD} && ln -s /usr/local/buster/node_modules.version /app/node_modules.version"
-fi
-
 DOCKER_CMD=${1:-/bin/bash}
 
 cd ${BUSTER_REPO_PATH}
