@@ -13,6 +13,6 @@ ENV PATH="$PATH:/usr/local/buster/bin"
 
 RUN set -eux; \
 			arch="$(dpkg --print-architecture)"; arch="${arch##*-}"; \
-    apt-get update && apt-get upgrade -qqy && apt-get install --no-install-recommends -y ca-certificates jq wget && \
+    apt-get update && apt-get upgrade -qqy && apt-get install --no-install-recommends -y ca-certificates git jq wget && \
 		ls -la /usr/local/buster && \
 		BUSTER_VERBOSE=1 /usr/local/buster/bin/buster --version
