@@ -73,7 +73,7 @@ buster_ensurePNPM() {
 }
 
 buster_ensureNodeModules() {
-  if [ ! -d "${BUSTER_NODE_MODULES_PATH}" ] || [ ! "$(cat ${BUSTER_PATH}/node_modules.version)" == "${BUSTER_NODE_MODULES_IDENTIFIER}" ]; then
+  if [ ! -d "${BUSTER_NODE_MODULES_PATH}" ] || [ ! -d "${BUSTER_NODE_MODULES_PATH}/node_modules.version" ] || [ ! "$(cat ${BUSTER_NODE_MODULES_PATH}/node_modules.version)" == "${BUSTER_NODE_MODULES_IDENTIFIER}" ]; then
     # TODO: Would be nice if it would only output on error situations
     local npmInstall="${BUSTER_PNPM_EXE} i --prefix ${BUSTER_PATH}"
     if [ "${BUSTER_VERBOSE}" = "1" ]; then
@@ -81,7 +81,7 @@ buster_ensureNodeModules() {
     else
       $npmInstall --silent
     fi
-    echo "${BUSTER_NODE_MODULES_IDENTIFIER}" > ${BUSTER_PATH}/node_modules.version
+    echo "${BUSTER_NODE_MODULES_IDENTIFIER}" > ${BUSTER_NODE_MODULES_PATH}/node_modules.version
   fi
 }
 
