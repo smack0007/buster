@@ -1,11 +1,1 @@
-{
-  "name": "hello-world",
-  "description": "",
-  "version": "0.0.1",
-  "type": "module",
-  "main": "./src/main.ts",
-  "scripts": {
-    "run": "buster run ./src/main.ts",
-    "run:bob": "buster run ./src/main.ts Bob"
-  }
-}
+{"name":"hello-world","description":"","version":"0.0.1","type":"module","main":"./src/main.ts","scripts":{"run":"buster run ./src/main.ts","run:bob":"buster run ./src/main.ts Bob"}}

@@ -2,7 +2,7 @@ name: CI
 on:
   push:
   pull_request:
-    branches: [ main ]
+    branches: [main]
 env:
   # For tput
   CI: 1
@@ -13,12 +13,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Init
-        run: ./init.sh
+        run: ./docker-run.sh ./init.sh
       - name: Lint
-        run: ./lint.sh
+        run: ./docker-run.sh ./lint.sh
       - name: Check
-        run: ./check.sh
+        run: ./docker-run.sh ./check.sh
       - name: Build
-        run: ./build.sh
+        run: ./docker-run.sh ./build.sh
       - name: Tests
-        run: ./test.sh
+        run: ./docker-run.sh ./test.sh
