@@ -1,5 +1,5 @@
 #!/bin/sh
-set -eu
+set -e
 BUSTER_PATH="$(dirname $(realpath "${BASH_SOURCE[0]}"))"
 BUSTER_VERSION="$(cat ${BUSTER_PATH}/package.json | grep "version" | cut -d ":" -f 2 | tr -d '", ')"
 

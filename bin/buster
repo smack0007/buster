@@ -37,7 +37,8 @@ buster_download() {
 
 buster_ensureNode() {
   if [ ! -d "${BUSTER_NODE_PATH}" ]; then
-    mkdir -p ${BUSTER_TMP}
+    [ "${BUSTER_VERBOSE}" = "1" ] && echo "Downloading ${BUSTER_NODE_IDENTIFIER}..."
+		mkdir -p ${BUSTER_TMP}
     pushd ${BUSTER_TMP} > /dev/null
     local downloadUrl=https://nodejs.org/dist/${BUSTER_NODE_VERSION}/${BUSTER_NODE_IDENTIFIER}.tar.gz    
     if ! buster_download "${downloadUrl}"; then
@@ -55,7 +56,8 @@ buster_ensureNode() {
 
 buster_ensurePNPM() {
   if [ ! -f "${BUSTER_PNPM_PATH}/pnpm" ]; then
-    mkdir -p ${BUSTER_PNPM_PATH}
+    [ "${BUSTER_VERBOSE}" = "1" ] && echo "Downloading ${BUSTER_PNPM_IDENTIFIER}..."
+		mkdir -p ${BUSTER_PNPM_PATH}
     pushd ${BUSTER_PNPM_PATH} > /dev/null
     
     local downloadUrl=https://github.com/pnpm/pnpm/releases/download/${BUSTER_PNPM_VERSION}/pnpm-${BUSTER_PNPM_PLATFORM}
@@ -71,7 +73,7 @@ buster_ensurePNPM() {
 }
 
 buster_ensureNodeModules() {
-  if [ ! -d "${BUSTER_NODE_MODULES_PATH}" ] || [ ! "$(cat ${BUSTER_PATH}/node_modules.version)" == "${BUSTER_NODE_MODULES_IDENTIFIER}" ]; then
+  if [ ! -d "${BUSTER_NODE_MODULES_PATH}" ] || [ ! -d "${BUSTER_EXT}/node_modules.version" ] || [ ! "$(cat ${BUSTER_EXT}/node_modules.version)" == "${BUSTER_NODE_MODULES_IDENTIFIER}" ]; then
     # TODO: Would be nice if it would only output on error situations
     local npmInstall="${BUSTER_PNPM_EXE} i --prefix ${BUSTER_PATH}"
     if [ "${BUSTER_VERBOSE}" = "1" ]; then
@@ -79,7 +81,7 @@ buster_ensureNodeModules() {
     else
       $npmInstall --silent
     fi
-    echo "${BUSTER_NODE_MODULES_IDENTIFIER}" > ${BUSTER_PATH}/node_modules.version
+    echo "${BUSTER_NODE_MODULES_IDENTIFIER}" > ${BUSTER_EXT}/node_modules.version
   fi
 }
 
