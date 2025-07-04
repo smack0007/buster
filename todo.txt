@@ -1,4 +1,5 @@
 - Help menu
 - fmt command to run prettier
 - "buster run" without the "." starts the node CLI. Not sure if that is correct.
+- Look into pnpm message about reinstalling node_modules.
 

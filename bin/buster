@@ -37,7 +37,8 @@ buster_download() {
 
 buster_ensureNode() {
   if [ ! -d "${BUSTER_NODE_PATH}" ]; then
-    mkdir -p ${BUSTER_TMP}
+    [ "${BUSTER_VERBOSE}" = "1" ] && echo "Downloading ${BUSTER_NODE_IDENTIFIER}..."
+		mkdir -p ${BUSTER_TMP}
     pushd ${BUSTER_TMP} > /dev/null
     local downloadUrl=https://nodejs.org/dist/${BUSTER_NODE_VERSION}/${BUSTER_NODE_IDENTIFIER}.tar.gz    
     if ! buster_download "${downloadUrl}"; then
@@ -55,7 +56,8 @@ buster_ensureNode() {
 
 buster_ensurePNPM() {
   if [ ! -f "${BUSTER_PNPM_PATH}/pnpm" ]; then
-    mkdir -p ${BUSTER_PNPM_PATH}
+    [ "${BUSTER_VERBOSE}" = "1" ] && echo "Downloading ${BUSTER_PNPM_IDENTIFIER}..."
+		mkdir -p ${BUSTER_PNPM_PATH}
     pushd ${BUSTER_PNPM_PATH} > /dev/null
     
     local downloadUrl=https://github.com/pnpm/pnpm/releases/download/${BUSTER_PNPM_VERSION}/pnpm-${BUSTER_PNPM_PLATFORM}
