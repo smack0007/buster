@@ -5,4 +5,5 @@ set -e
 cd ${BUSTER_REPO_PATH}
 docker build \
   -t ${BUSTER_CONTAINER_NAME}:latest \
+	-t ${BUSTER_CONTAINER_NAME}:${BUSTER_VERSION} \
   .
