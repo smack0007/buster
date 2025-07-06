@@ -1,0 +1,6 @@
+{
+  "extends": "@buster/configs/tsconfig.json",
+  "include": [
+    "**/*.ts"
+  ]
+}
