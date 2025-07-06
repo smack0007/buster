@@ -1,7 +1,7 @@
 import { describe, expect, it } from "@buster/test";
 import { CLICKER_PATH, HELLO_WORLD_PATH, setupIntegrationTest } from "./integrationTest.ts";
 import { chdir, exec } from "../src/lib/os.ts";
-import { exists, writeTextFile } from "../src/lib/fs.ts";
+import { exists, removeFile, writeTextFile } from "../src/lib/fs.ts";
 import { type ArrayMinLength } from "../src/lib/types.ts";
 import { join } from "../src/lib/path.ts";
 import { loadPackageJson } from "../src/lib/utils.ts";
@@ -13,10 +13,10 @@ async function insertIsNumberIntoPackageJson(projectPath: string): Promise<void>
     packageJson.dependencies = {};
   }
   packageJson.dependencies["is-number"] = "7.0.0";
-  await writeTextFile(packageJsonPath, JSON.stringify(packageJson));
+  await writeTextFile(packageJsonPath, JSON.stringify(packageJson, undefined, 2));
 }
 
-describe("add", async () => {
+describe("remove", async () => {
   setupIntegrationTest();
 
   describe("cwd", () => {
@@ -27,7 +27,11 @@ describe("add", async () => {
 
     for (const [name, projectPath, command] of testdata) {
       it(name, async () => {
-        chdir(projectPath);
+        if (await exists(join([projectPath, "pnpm-lock.yaml"]))) {
+					await removeFile(join([projectPath, "pnpm-lock.yaml"]));
+				}
+				
+				chdir(projectPath);
 
         try {
           await insertIsNumberIntoPackageJson(projectPath);
@@ -56,7 +60,11 @@ describe("add", async () => {
 
     for (const [name, projectPath, command] of testdata) {
       it(name, async () => {
-        try {
+        if (await exists(join([projectPath, "pnpm-lock.yaml"]))) {
+					await removeFile(join([projectPath, "pnpm-lock.yaml"]));
+				}
+				
+				try {
           await insertIsNumberIntoPackageJson(projectPath);
           let result = await exec(["buster", "install", "--dir", projectPath]);
           expect(result.code).toEqual(0, "buster install failed.");
