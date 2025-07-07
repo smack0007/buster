@@ -5,7 +5,7 @@ import { join } from "./path.ts";
 import type { ArrayMinLength, Enum } from "./types.ts";
 import { throwError } from "./utils.ts";
 
-export const BUSTER_NODE_OPTIONS = ["--disable-warning=ExperimentalWarning", "--experimental-transform-types"] as const;
+export const BUSTER_NODE_OPTIONS = ["--disable-warning=ExperimentalWarning", "--experimental-strip-types"] as const;
 
 export function getBusterPath(): string {
   return process.env["BUSTER_PATH"] ?? throwError("BUSTER_PATH was not defined.");
