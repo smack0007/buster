@@ -8,8 +8,10 @@ function isObject(value: unknown): value is {} {
 
 class Expect<T> {
   private readonly isObject;
+  protected readonly value: T;
 
-  public constructor(protected readonly value: T) {
+  public constructor(value: T) {
+    this.value = value;
     this.isObject = isObject(value);
   }
 
