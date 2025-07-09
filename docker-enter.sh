@@ -12,6 +12,6 @@ if [[ ! "${CI}" = "1" ]]; then
   DOCKER_FLAGS="${DOCKER_FLAGS} -it"
 fi
 
-cd ${BUSTER_REPO_PATH}
+cd ${BUSTER_PATH}
 echo ${DOCKER_FLAGS}
 docker run ${DOCKER_FLAGS} ${BUSTER_CONTAINER_NAME}:${BUSTER_CONTAINER_TAG}

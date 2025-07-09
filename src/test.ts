@@ -18,6 +18,8 @@ const BUSTER_TEST_OPTIONS = [
   // TODO: Implement this as an argument to the test command.
   "--test-concurrency",
   "1",
+	"--test-reporter",
+	"spec",
   "--test",
 ] as const;
 
