@@ -14,7 +14,7 @@ async function insertIsNumberIntoPackageJson(projectPath: string): Promise<void>
     packageJson.dependencies = {};
   }
   packageJson.dependencies["is-number"] = "7.0.0";
-  await writeTextFile(packageJsonPath, JSON.stringify(packageJson));
+  await writeTextFile(packageJsonPath, JSON.stringify(packageJson, undefined, 2));
 }
 
 describe("add", async () => {
