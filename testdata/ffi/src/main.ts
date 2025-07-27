@@ -1,7 +1,7 @@
 import { dlopen, FFIType } from "@buster/ffi";
 import { osname, OperatingSystemName } from "@buster/os";
 
-let extension = "so";
+let extension = "so.6";
 
 if (osname() === OperatingSystemName.macOS) {
   extension = "dylib";
