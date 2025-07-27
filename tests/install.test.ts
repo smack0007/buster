@@ -1,4 +1,5 @@
-import { describe, expect, it } from "@buster/test";
+import { describe, it } from "node:test";
+import { expect } from "expect";
 import { CLICKER_PATH, HELLO_WORLD_PATH, setupIntegrationTest } from "./integrationTest.ts";
 import { chdir, exec } from "../src/lib/os.ts";
 import { exists, tryRemoveDirectory, tryRemoveFile } from "../src/lib/fs.ts";
@@ -23,9 +24,9 @@ describe("install", async () => {
         const result = await exec(command);
         expect(result.code).toEqual(0);
 
-        expect(await exists("node_modules")).toBeTrue();
-        expect(await exists("pnpm-lock.yaml")).toBeTrue();
-        expect(await exists(join(["node_modules", "@buster"]))).toBeTrue();
+        expect(await exists("node_modules")).toBe(true);
+        expect(await exists("pnpm-lock.yaml")).toBe(true);
+        expect(await exists(join(["node_modules", "@buster"]))).toBe(true);
       });
     }
   });
@@ -44,9 +45,9 @@ describe("install", async () => {
         const result = await exec(command);
         expect(result.code).toEqual(0);
 
-        expect(await exists(join([projectPath, "node_modules"]))).toBeTrue();
-        expect(await exists(join([projectPath, "node_modules", "@buster"]))).toBeTrue();
-        expect(await exists(join([projectPath, "pnpm-lock.yaml"]))).toBeTrue();
+        expect(await exists(join([projectPath, "node_modules"]))).toBe(true);
+        expect(await exists(join([projectPath, "node_modules", "@buster"]))).toBe(true);
+        expect(await exists(join([projectPath, "pnpm-lock.yaml"]))).toBe(true);
       });
     }
   });

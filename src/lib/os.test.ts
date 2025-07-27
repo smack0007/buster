@@ -1,4 +1,5 @@
-import { describe, expect, it } from "@buster/test";
+import { describe, it } from "node:test";
+import { expect } from "expect";
 import { exec } from "./os.ts";
 
 describe("os.ts", () => {

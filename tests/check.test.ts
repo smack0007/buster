@@ -1,4 +1,4 @@
-import { beforeEach, describe } from "@buster/test";
+import { beforeEach, describe } from "node:test";
 import {
   BUSTER_TESTDATA_PATH,
   HELLO_WORLD_PATH,

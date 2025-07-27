@@ -1,4 +1,6 @@
-import { describe, expect, fail, it } from "../../lib/test.ts";
+import { fail } from "node:assert"
+import { describe, it } from "node:test";
+import { expect } from "expect";
 import { hasToStringMethod } from "./utils.ts";
 
 describe("utils.ts", () => {

@@ -1,4 +1,5 @@
-import { describe, expect, it } from "@buster/test";
+import { describe, it } from "node:test";
+import { expect } from "expect";
 import { CLICKER_PATH, HELLO_WORLD_PATH, setupIntegrationTest } from "./integrationTest.ts";
 import { chdir, exec } from "../src/lib/os.ts";
 import { exists, writeTextFile } from "../src/lib/fs.ts";
@@ -37,10 +38,10 @@ describe("add", async () => {
           result = await exec(command);
           expect(result.code).toEqual(0);
 
-          expect(await exists("node_modules")).toBeTrue();
-          expect(await exists("pnpm-lock.yaml")).toBeTrue();
-          expect(await exists(join(["node_modules", "is-number"]))).toBeFalse();
-          expect(await exists(join(["node_modules", "@buster"]))).toBeTrue();
+          expect(await exists("node_modules")).toBe(true);
+          expect(await exists("pnpm-lock.yaml")).toBe(true);
+          expect(await exists(join(["node_modules", "is-number"]))).toBe(false);
+          expect(await exists(join(["node_modules", "@buster"]))).toBe(true);
         } finally {
           await exec(["git", "restore", join([projectPath, "package.json"])]);
         }
@@ -59,17 +60,15 @@ describe("add", async () => {
         try {
           await insertIsNumberIntoPackageJson(projectPath);
           let result = await exec(["buster", "install", "--dir", projectPath]);
-          expect(result.code).toEqual(0, "buster install failed.");
+          expect(result.code).toEqual(0);
 
           result = await exec(command);
-          expect(result.code).toEqual(0, `${command.join(" ")} failed.`);
+          expect(result.code).toEqual(0);
 
-          expect(await exists(join([projectPath, "node_modules"]))).toBeTrue("node_modules does not exist.");
-          expect(await exists(join([projectPath, "node_modules", "is-number"]))).toBeFalse("is-number still exists.");
-          expect(await exists(join([projectPath, "node_modules", "@buster"]))).toBeTrue(
-            "node_modules/@buster does not exist.",
-          );
-          expect(await exists(join([projectPath, "pnpm-lock.yaml"]))).toBeTrue("pnpm-lock.yaml does not exist.");
+          expect(await exists(join([projectPath, "node_modules"]))).toBe(true);
+          expect(await exists(join([projectPath, "node_modules", "is-number"]))).toBe(false);
+          expect(await exists(join([projectPath, "node_modules", "@buster"]))).toBe(true);
+          expect(await exists(join([projectPath, "pnpm-lock.yaml"]))).toBe(true);
         } finally {
           await exec(["git", "restore", join([projectPath, "package.json"])]);
         }

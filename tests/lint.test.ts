@@ -1,4 +1,4 @@
-import { beforeEach, describe } from "@buster/test";
+import { beforeEach, describe } from "node:test";
 import { HELLO_WORLD_PATH, setupIntegrationTest, testCode0 } from "./integrationTest.ts";
 import { chdir } from "../src/lib/os.ts";
 
