@@ -1,6 +1,6 @@
 import { describe, it } from "node:test";
 import { expect } from "expect";
-import { BUSTER_TMP_PATH, setupIntegrationTest, testCode0, testCode0AndExpectedOutput } from "./integrationTest.ts";
+import { BUSTER_TMP_PATH, setupIntegrationTest, testCode0 } from "./integrationTest.ts";
 import { exec } from "../src/lib/os.ts";
 
 describe("init", async () => {
