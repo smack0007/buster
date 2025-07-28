@@ -11,6 +11,7 @@
     "vite": "7.0.0"
   },
   "devDependencies": {
+    "@tsconfig/node24": "24.0.1",
     "expect": "30.0.5"
   }
 }

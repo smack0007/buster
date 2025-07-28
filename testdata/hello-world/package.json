@@ -9,6 +9,7 @@
     "run:bob": "buster run ./src/main.ts Bob"
   },
   "devDependencies": {
+    "@tsconfig/node24": "24.0.1",
     "expect": "30.0.5"
   }
 }

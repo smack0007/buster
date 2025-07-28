@@ -1,11 +1,9 @@
 {
-  "extends": "./lib/configs/tsconfig.json",
+  "extends": "@tsconfig/node24/tsconfig.json",
 
   "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "@buster/*": ["lib/*"]
-    }
+		"noEmit": true,
+    "allowImportingTsExtensions": true
   },
 	
   "include": ["lib/**/*.ts", "src/**/*.ts", "tests/**/*.ts"]
