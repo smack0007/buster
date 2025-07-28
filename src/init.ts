@@ -1,9 +1,8 @@
-import { basename, dirname } from "path";
 import { parseArgs } from "./lib/args.ts";
 import { jsonStringifyColor } from "./lib/colors.ts";
-import { ensureProjectType, getBusterTemplatesPath, getBusterTmpPath } from "./lib/common.ts";
-import { ensureDirectory, exists, listDirectories, listFiles, readTextFile, writeTextFile } from "./lib/fs.ts";
-import { join, resolve, split } from "./lib/path.ts";
+import { ensureProjectType, getBusterTemplatesPath } from "./lib/common.ts";
+import { ensureDirectory, exists, listFiles, readTextFile, writeTextFile } from "./lib/fs.ts";
+import { dirname, join, resolve, split } from "./lib/path.ts";
 
 export interface InitArgs {
   directory?: string;
