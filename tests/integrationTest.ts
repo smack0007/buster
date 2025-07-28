@@ -1,4 +1,5 @@
-import { afterEach, beforeEach, expect, it } from "@buster/test";
+import { afterEach, beforeEach, it } from "node:test";
+import { expect } from "expect";
 import { getBusterPath, getBusterTmpPath } from "../src/lib/common.ts";
 import { exists, removeDirectory } from "../src/lib/fs.ts";
 import { chdir, exec } from "../src/lib/os.ts";

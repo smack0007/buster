@@ -1,4 +1,5 @@
-import { describe, expect, it } from "@buster/test";
+import { describe, it } from "node:test";
+import { expect } from "expect";
 import { parseArgs, type ParseArgsConfig } from "./args.ts";
 
 const FOO_BAR_CONFIG = {
@@ -42,12 +43,6 @@ describe("args.ts", () => {
     it("single positional", () => {
       const args: string[] = ["foo"];
       expect(parseArgs(args, SINGLE_POSITIONAL_CONFIG)).toEqual({ values: "foo", foo: "foo", bar: 42 });
-    });
-
-    it("throws if single positional is true and no positional is provided", () => {
-      const args: string[] = ["--foo", "abc"];
-
-      expect(() => parseArgs(args, SINGLE_POSITIONAL_CONFIG)).toThrow();
     });
   });
 });

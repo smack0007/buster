@@ -1,4 +1,6 @@
-import { describe, expect, fail, it } from "../../lib/test.ts";
+import { fail } from "node:assert"
+import { describe, it } from "node:test";
+import { expect } from "expect";
 import { hasToStringMethod } from "./utils.ts";
 
 describe("utils.ts", () => {
@@ -8,7 +10,7 @@ describe("utils.ts", () => {
       [true, "true"],
       [42, "42"],
       ["foo", "foo"],
-      [() => "foo", `()=>"foo"`],
+      [() => "foo", `() => "foo"`],
       [{ toString: () => "foo" }, "foo"],
       [new Error("foo"), "Error: foo"],
     ];

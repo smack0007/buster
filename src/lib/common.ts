@@ -34,9 +34,6 @@ export function getNodeOptions(): string[] {
 
   result.push(`--env-file=${busterPath}/buster.env`);
 
-  result.push("--import");
-  result.push(`${busterPath}/src/node-register.ts`);
-
   return result;
 }
 
