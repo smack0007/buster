@@ -7,6 +7,8 @@ import {
 } from "node:path";
 import { IS_WINDOWS } from "./os.ts";
 
+export type PathLike = string | string[];
+
 export const SEPERATOR = IS_WINDOWS ? "\\" : "/";
 export const SEPERATOR_PATTERN = IS_WINDOWS ? /[\\/]+/ : /\/+/;
 
@@ -16,6 +18,13 @@ export function basename(path: string): string {
 
 export function dirname(path: string): string {
   return nodeDirname(path);
+}
+
+export function ensurePathIsString(path: PathLike): string {
+  if (Array.isArray(path)) {
+    return join(path);
+  }
+  return path;
 }
 
 export function extname(path: string): string {
