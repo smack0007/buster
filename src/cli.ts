@@ -24,6 +24,7 @@ interface CLICommand {
 
 const commands: Record<string, CLICommand> = {
   add,
+	// TODO: bundle,
   check,
   gc,
   init,
