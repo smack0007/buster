@@ -1,13 +1,17 @@
 type ParseArgsPositionalTypeMap<T extends boolean | undefined> = T extends true ? string : string[];
 
-type ParseArgsOptionsType = "number" | "string";
-type ParseArgsOptionsTypeMap<T extends ParseArgsOptionsType, D extends unknown | undefined> = T extends "number"
+type ParseArgsOptionsType = "boolean" | "number" | "string";
+type ParseArgsOptionsTypeMap<T extends ParseArgsOptionsType, D extends unknown | undefined> = T extends "boolean"
   ? D extends undefined
-    ? number | undefined
-    : number
-  : D extends undefined
-    ? string | undefined
-    : string;
+    ? boolean | undefined
+    : boolean
+  : T extends "number"
+    ? D extends undefined
+      ? number | undefined
+      : number
+    : D extends undefined
+      ? string | undefined
+      : string;
 
 export type ParseArgsDescription = {
   keys: string[];
@@ -62,14 +66,20 @@ export function parseArgs<
 
       parseNextArgAsOptionName = null;
     } else {
+      let isBoolean = false;
       for (const [optionName, optionDesc] of Object.entries(config.options) as [KOptions, ParseArgsDescription][]) {
         if (optionDesc.keys.includes(arg)) {
-          parseNextArgAsOptionName = optionName as KOptions;
+          if (optionDesc.type === "boolean") {
+            isBoolean = true;
+            values[optionName as KOptions] = true;
+          } else {
+            parseNextArgAsOptionName = optionName as KOptions;
+          }
           break;
         }
       }
 
-      if (parseNextArgAsOptionName === null) {
+      if (parseNextArgAsOptionName === null && !isBoolean) {
         if (config.positional.single) {
           (values[config.positional.key as KPositional] as string) = arg;
         } else {

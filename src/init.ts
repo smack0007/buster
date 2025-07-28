@@ -1,11 +1,13 @@
+import { basename } from "path";
 import { parseArgs } from "./lib/args.ts";
 import { jsonStringifyColor } from "./lib/colors.ts";
 import { ensureProjectType, getBusterTemplatesPath } from "./lib/common.ts";
-import { ensureDirectory, exists, listFiles, readTextFile, writeTextFile } from "./lib/fs.ts";
+import { ensureDirectory, exists, listDirectories, listFiles, readTextFile, writeTextFile } from "./lib/fs.ts";
 import { dirname, join, resolve, split } from "./lib/path.ts";
 
 export interface InitArgs {
   directory?: string;
+  list: boolean;
   type: string;
 }
 
@@ -16,6 +18,11 @@ export function parse(args: string[]): InitArgs {
       single: true,
     },
     options: {
+      list: {
+        keys: ["--list", "-l"],
+        type: "boolean",
+        default: false,
+      },
       type: {
         keys: ["--type", "-t"],
         type: "string",
@@ -26,6 +33,13 @@ export function parse(args: string[]): InitArgs {
 }
 
 export async function run(args: InitArgs): Promise<number> {
+  const projectTypes = await getProjectTypes();
+
+  if (args.list) {
+    console.info(`Project types: ${jsonStringifyColor(projectTypes)}`);
+    return 0;
+  }
+
   const path = resolve(args.directory ?? process.cwd());
   const projectType = ensureProjectType(args.type);
 
@@ -62,6 +76,13 @@ export async function run(args: InitArgs): Promise<number> {
   }
 
   return 0;
+}
+
+async function getProjectTypes(): Promise<string[]> {
+  const builtinTemplates = (await listDirectories(getBusterTemplatesPath()))
+    .map((x) => basename(x))
+    .filter((x) => x !== "base");
+  return builtinTemplates;
 }
 
 async function writeTemplateFile(srcPath: string, destPath: string, vars: Record<string, string>): Promise<void> {
