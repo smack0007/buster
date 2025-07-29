@@ -41,7 +41,7 @@ export async function isFile(path: PathLike): Promise<boolean> {
 export async function listDirectories(path: PathLike): Promise<string[]> {
   return (await readdir(ensurePathIsString(path), { withFileTypes: true }))
     .filter((entry) => entry.isDirectory())
-    .map((entry) => join([entry.parentPath, entry.name]));
+    .map((entry) => entry.name);
 }
 
 export interface ListFilesOptions {

@@ -79,9 +79,7 @@ export async function run(args: InitArgs): Promise<number> {
 }
 
 async function getProjectTypes(): Promise<string[]> {
-  const builtinTemplates = (await listDirectories(getBusterTemplatesPath()))
-    .map((x) => basename(x))
-    .filter((x) => x !== "base");
+  const builtinTemplates = (await listDirectories(getBusterTemplatesPath())).filter((x) => x !== "base");
   return builtinTemplates;
 }
 
