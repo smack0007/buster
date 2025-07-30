@@ -1,26 +1,36 @@
-#!/bin/sh
+#!/bin/bash
 set -e
-BUSTER_PATH="$(dirname $(realpath "${BASH_SOURCE[0]}"))"
+. "$(dirname $(realpath "${BASH_SOURCE[0]}"))/buster.env"
+
+cd ${BUSTER_PATH}
+
+./build.sh
+
 BUSTER_VERSION="$(cat ${BUSTER_PATH}/package.json | grep "version" | cut -d ":" -f 2 | tr -d '", ')"
+BUSTER_RELEASE_PATH=$(mktemp -d)
 
-BUSTER_NEW_VERSION=${1:-}
-if [ "${BUSTER_NEW_VERSION}" = "" ]; then
-  echo "Please provide a version number."
-  exit 1
-fi
+cd ${BUSTER_RELEASE_PATH}
 
-sed -i "s/\"version\": \"${BUSTER_VERSION}\"/\"version\": \"${BUSTER_NEW_VERSION}\"/" "${BUSTER_PATH}/package.json"
+# BUSTER_NEW_VERSION=${1:-}
+# if [ "${BUSTER_NEW_VERSION}" = "" ]; then
+#   echo "Please provide a version number."
+#   exit 1
+# fi
 
-# rm -rf "${BUSTER_PATH}/.github"
-# rm -rf "${BUSTER_PATH}/.vscode"
-# rm -rf "${BUSTER_PATH}/ext"
-# rm -rf "${BUSTER_PATH}/node_modules"
-# rm -rf "${BUSTER_PATH}/src"
-# rm -rf "${BUSTER_PATH}/testdata"
-# rm -rf "${BUSTER_PATH}/tests"
-# rm "${BUSTER_PATH}/.oxlintrc.json"
-# rm "${BUSTER_PATH}/.prettierrc.json"
-# rm "${BUSTER_PATH}/node_modules.version"
-# rm "${BUSTER_PATH}/todo.txt"
-# rm "${BUSTER_PATH}/tsconfig.json"
-# rm "${BUSTER_PATH}/*.sh"
+# sed -i "s/\"version\": \"${BUSTER_VERSION}\"/\"version\": \"${BUSTER_NEW_VERSION}\"/" "${BUSTER_PATH}/package.json"
+
+git clone ${BUSTER_PATH} . --branch=releases
+cp -r ${BUSTER_PATH}/bin         ./bin
+cp -r ${BUSTER_PATH}/dist        ./dist
+cp -r ${BUSTER_PATH}/templates   ./templates
+cp ${BUSTER_PATH}/buster.env     ./buster.env
+cp ${BUSTER_PATH}/package.json   ./package.json
+cp ${BUSTER_PATH}/pnpm-lock.yaml ./pnpm-lock.yaml
+git add -A && git commit -m "v${BUSTER_VERSION}" && git push 
+
+# Now the release commit has been pushed back to the current repo
+cd ${BUSTER_RELEASE_PATH}
+git push 
+# TODO: Figure out how to push the tag
+# git tag -a v${BUSTER_VERSION} -m "$(date +%Y-%m-%d)"
+# git push origin tag 

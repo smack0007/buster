@@ -2,11 +2,11 @@ FROM debian:bookworm-slim
 LABEL maintainer="Zachary Snow <zachary.snow+docker@gmail.com>"
 
 WORKDIR /usr/local/buster
-COPY ./bin ./bin
-COPY ./lib ./lib
-COPY ./src ./src
-COPY ./buster.env ./buster.env
-COPY ./package.json ./package.json
+COPY ./bin            ./bin
+COPY ./dist           ./dist
+COPY ./templates      ./templates
+COPY ./buster.env     ./buster.env
+COPY ./package.json   ./package.json
 COPY ./pnpm-lock.yaml ./pnpm-lock.yaml
 
 ENV PATH="$PATH:/usr/local/buster/bin"
