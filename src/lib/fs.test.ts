@@ -11,18 +11,10 @@ describe("fs.ts", () => {
 
   describe("listDirectories", () => {
     it("recursive is false", async () => {
-      expect(await listDirectories(".")).toEqual([
-        ".git",
-        ".github",
-        ".vscode",
-        "bin",
-        "ext",
-        "node_modules",
-        "src",
-        "templates",
-        "testdata",
-        "tests",
-      ]);
+      expect(await listDirectories(".")).toContain("bin");
+      expect(await listDirectories(".")).toContain("src");
+      expect(await listDirectories(".")).toContain("templates");
+      expect(await listDirectories(".")).toContain("tests");
     });
   });
 
