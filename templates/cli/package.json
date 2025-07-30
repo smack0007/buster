@@ -1,0 +1,13 @@
+{
+  "name": "${{projectName}}",
+  "description": "",
+  "version": "0.0.1",
+  "type": "module",
+  "main": "./src/main.ts",
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "24.1.0",
+    "@tsconfig/node24": "24.0.1",
+    "expect": "30.0.5"
+  }
+}

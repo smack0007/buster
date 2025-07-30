@@ -1,0 +1,125 @@
+#!/bin/bash
+set -eu
+
+buster_calculateHash() {
+  echo "$(md5sum $1 | cut -d " " -f 1)"
+}
+
+BUSTER_PATH="$(realpath $(dirname $(realpath "${BASH_SOURCE[0]}"))/..)"
+BUSTER_DIST=${BUSTER_PATH}/dist
+BUSTER_EXT=${BUSTER_PATH}/ext
+BUSTER_SRC=${BUSTER_PATH}/src
+BUSTER_TMP=${BUSTER_PATH}/tmp
+BUSTER_PLATFORM="$(echo "$(uname -s)-$(uname -m)" | tr '[:upper:]' '[:lower:]' | sed 's/x86_64/x64/')"
+BUSTER_VERSION="$(cat ${BUSTER_PATH}/package.json | grep "version" | cut -d ":" -f 2 | tr -d '", ')"
+
+BUSTER_ENV_FILE="${BUSTER_PATH}/buster.env"
+source "${BUSTER_ENV_FILE}" 
+
+BUSTER_NODE_IDENTIFIER="node-${BUSTER_NODE_VERSION}-${BUSTER_PLATFORM}"
+BUSTER_NODE_PATH="${BUSTER_EXT}/${BUSTER_NODE_IDENTIFIER}"
+
+BUSTER_NODE_EXE="${BUSTER_NODE_PATH}/bin/node --env-file=${BUSTER_ENV_FILE}"
+
+BUSTER_PNPM_PLATFORM="$(echo "${BUSTER_PLATFORM}" | sed 's/darwin/macos/')"
+BUSTER_PNPM_IDENTIFIER="pnpm-${BUSTER_PNPM_VERSION}-${BUSTER_PNPM_PLATFORM}"
+BUSTER_PNPM_PATH="${BUSTER_EXT}/${BUSTER_PNPM_IDENTIFIER}"
+BUSTER_PNPM_EXE="${BUSTER_PNPM_PATH}/pnpm"
+
+BUSTER_NODE_MODULES_IDENTIFIER="${BUSTER_NODE_IDENTIFIER}-$(buster_calculateHash "${BUSTER_PATH}/package.json")"
+BUSTER_NODE_MODULES_PATH="${BUSTER_PATH}/node_modules"
+
+BUSTER_VERBOSE=${BUSTER_VERBOSE:-0}
+
+buster_download() {
+  wget -q "$1"
+}
+
+buster_ensureNode() {
+  if [ ! -d "${BUSTER_NODE_PATH}" ]; then
+    [ "${BUSTER_VERBOSE}" = "1" ] && echo "Downloading ${BUSTER_NODE_IDENTIFIER}..."
+		mkdir -p ${BUSTER_TMP}
+    pushd ${BUSTER_TMP} > /dev/null
+    local downloadUrl=https://nodejs.org/dist/${BUSTER_NODE_VERSION}/${BUSTER_NODE_IDENTIFIER}.tar.gz    
+    if ! buster_download "${downloadUrl}"; then
+      echo "Failed to download node from \"${downloadUrl}\""
+      exit
+    fi
+    tar xzf ${BUSTER_NODE_IDENTIFIER}.tar.gz
+    rm ${BUSTER_NODE_IDENTIFIER}.tar.gz
+    mv ${BUSTER_NODE_IDENTIFIER} node
+    mv node ${BUSTER_NODE_PATH}
+    popd > /dev/null
+    rm -rf "${BUSTER_TMP}"
+  fi
+}
+
+buster_ensurePNPM() {
+  if [ ! -f "${BUSTER_PNPM_PATH}/pnpm" ]; then
+    [ "${BUSTER_VERBOSE}" = "1" ] && echo "Downloading ${BUSTER_PNPM_IDENTIFIER}..."
+		mkdir -p ${BUSTER_PNPM_PATH}
+    pushd ${BUSTER_PNPM_PATH} > /dev/null
+    
+    local downloadUrl=https://github.com/pnpm/pnpm/releases/download/${BUSTER_PNPM_VERSION}/pnpm-${BUSTER_PNPM_PLATFORM}
+    if ! buster_download "${downloadUrl}"; then
+      echo "Failed to download pnpm from \"${downloadUrl}\""
+      exit
+    fi
+    mv pnpm-${BUSTER_PNPM_PLATFORM} pnpm
+    chmod +x pnpm
+    
+    popd > /dev/null
+  fi
+}
+
+buster_ensureNodeModules() {
+  if [ ! -d "${BUSTER_NODE_MODULES_PATH}" ] || [ ! -f "${BUSTER_EXT}/node_modules.version" ] || [ ! "$(cat ${BUSTER_EXT}/node_modules.version)" == "${BUSTER_NODE_MODULES_IDENTIFIER}" ]; then
+    # TODO: Would be nice if it would only output on error situations
+    local npmInstall="${BUSTER_PNPM_EXE} i --prefix ${BUSTER_PATH}"
+    if [ "${BUSTER_VERBOSE}" = "1" ]; then
+      $npmInstall
+    else
+      $npmInstall --silent
+    fi
+    echo "${BUSTER_NODE_MODULES_IDENTIFIER}" > ${BUSTER_EXT}/node_modules.version
+  fi
+}
+
+# Ensure ext directory
+mkdir -p ${BUSTER_EXT}
+
+buster_ensureNode
+buster_ensurePNPM
+buster_ensureNodeModules
+
+# Ensure everything is available via the PATH variable.
+PATH="${BUSTER_NODE_PATH}/bin:${PATH}"
+PATH="${BUSTER_PNPM_PATH}:${PATH}"
+PATH="${BUSTER_PATH}/bin:${PATH}"
+
+BUSTER_REPLACE_SIGNAL="$(mktemp)"
+
+BUSTER_CLI_ENTRY_POINT="${BUSTER_SRC}/cli.ts"
+if [ ! -f "${BUSTER_CLI_ENTRY_POINT}" ]; then
+  BUSTER_CLI_ENTRY_POINT="${BUSTER_DIST}/cli.js"
+fi
+
+BUSTER_PATH="${BUSTER_PATH}" \
+BUSTER_NODE_PATH="${BUSTER_NODE_PATH}" \
+BUSTER_PNPM_PATH="${BUSTER_PNPM_PATH}" \
+BUSTER_NODE_MODULES_PATH="${BUSTER_NODE_MODULES_PATH}" \
+BUSTER_REPLACE_SIGNAL="${BUSTER_REPLACE_SIGNAL}" \
+  ${BUSTER_NODE_EXE} ${BUSTER_NODE_OPTIONS} "${BUSTER_CLI_ENTRY_POINT}" ${@}
+
+# If the file ${BUSTER_REPLACE_SIGNAL} has been written to, then the command
+# written to that files should take over execution. 
+if [ -f "${BUSTER_REPLACE_SIGNAL}" ]; then
+  BUSTER_REPLACEMENT_PROCESS="$(cat "${BUSTER_REPLACE_SIGNAL}")"
+  rm "${BUSTER_REPLACE_SIGNAL}"
+
+BUSTER_PATH="${BUSTER_PATH}" \
+BUSTER_NODE_PATH="${BUSTER_NODE_PATH}" \
+BUSTER_PNPM_PATH="${BUSTER_PNPM_PATH}" \
+BUSTER_NODE_MODULES_PATH="${BUSTER_NODE_MODULES_PATH}" \
+  ${BUSTER_REPLACEMENT_PROCESS}
+fi 
