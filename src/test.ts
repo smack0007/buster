@@ -3,6 +3,7 @@ import { getNodeExe, getNodeOptions, signalReplaceProcessAndExit } from "./lib/c
 
 export interface TestArgs {
   testArgs: string[];
+  concurrency?: number;
 }
 
 export function parse(args: string[]): TestArgs {
@@ -10,16 +11,14 @@ export function parse(args: string[]): TestArgs {
     positional: {
       key: "testArgs",
     },
-    options: {},
+    options: {
+      concurrency: {
+        keys: ["--concurrency"],
+        type: "number",
+      },
+    },
   });
 }
-
-const BUSTER_TEST_OPTIONS = [
-  // TODO: Implement this as an argument to the test command.
-  "--test-concurrency",
-  "1",
-  "--test",
-] as const;
 
 export async function run(args: TestArgs): Promise<number> {
   const nodeExe = getNodeExe();
@@ -28,7 +27,13 @@ export async function run(args: TestArgs): Promise<number> {
     args.testArgs[0] = "**/*.test.ts";
   }
 
-  await signalReplaceProcessAndExit([nodeExe, ...getNodeOptions(), ...BUSTER_TEST_OPTIONS, ...args.testArgs]);
+  const testOptions = ["--test"];
+
+  if (args.concurrency) {
+    testOptions.unshift("--test-concurrency", args.concurrency.toString());
+  }
+
+  await signalReplaceProcessAndExit([nodeExe, ...getNodeOptions(), ...testOptions, ...args.testArgs]);
 
   return 0;
 }

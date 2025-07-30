@@ -17,7 +17,7 @@ fi
 if [[ "${BUSTER_COMMAND}" = "" || "${BUSTER_COMMAND}" = "int" ]]; then
   echo "=== Integration Tests ==="
   pushd ${BUSTER_PATH}/tests > /dev/null
-  ${BUSTER_PATH}/bin/buster test "${2:-**/*.test.ts}"
+  ${BUSTER_PATH}/bin/buster test --concurrency 1 "${2:-**/*.test.ts}"
   if [ ! "$?" = "0" ]; then
     exit 1
   fi
