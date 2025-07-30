@@ -7,3 +7,7 @@ export function logError(message: string, error?: unknown): void {
     console.error(error);
   }
 }
+
+export function logMessage(message: string): void {
+  console.info(message);
+}

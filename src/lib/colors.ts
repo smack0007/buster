@@ -4,7 +4,7 @@ export function green(text: string): string {
   return util.styleText("green", text);
 }
 
-export function jsonStringifyColor(obj: unknown): string {
+export function toJsonColor(obj: unknown): string {
   return util.inspect(obj, { compact: false, colors: true });
 }
 

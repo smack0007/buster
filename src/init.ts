@@ -1,8 +1,8 @@
-import { basename } from "path";
 import { parseArgs } from "./lib/args.ts";
-import { jsonStringifyColor } from "./lib/colors.ts";
+import { toJsonColor } from "./lib/colors.ts";
 import { ensureProjectType, getBusterTemplatesPath } from "./lib/common.ts";
 import { ensureDirectory, exists, listDirectories, listFiles, readTextFile, writeTextFile } from "./lib/fs.ts";
+import { logError, logMessage } from "./lib/log.ts";
 import { dirname, join, resolve, split } from "./lib/path.ts";
 
 export interface InitArgs {
@@ -36,25 +36,30 @@ export async function run(args: InitArgs): Promise<number> {
   const projectTypes = await getProjectTypes();
 
   if (args.list) {
-    console.info(`Project types: ${jsonStringifyColor(projectTypes)}`);
+    logMessage(`Project types: ${toJsonColor(projectTypes)}`);
     return 0;
+  }
+
+  if (!projectTypes.includes(args.type)) {
+    logError(`Invalid project type: "${args.type}"`);
+    return 1;
   }
 
   const path = resolve(args.directory ?? process.cwd());
   const projectType = ensureProjectType(args.type);
 
-  console.info(`Initializing buster "${projectType}" project at "${path}"...`);
+  logMessage(`Initializing buster "${projectType}" project at "${path}"...`);
   await ensureDirectory(path);
 
   const projectName = path.split("/").reverse()[0];
-  console.info(`Project name infered to be '${projectName}'.`);
+  logMessage(`Project name infered to be '${projectName}'.`);
 
   const templateVars: Record<string, string> = {
     projectType,
     projectName,
   };
 
-  console.info(`Template variables: ${jsonStringifyColor(templateVars)}`);
+  logMessage(`Template variables: ${toJsonColor(templateVars)}`);
 
   const baseFiles = await listFiles([getBusterTemplatesPath(), "base"], { recursive: true });
   const templateFiles = await listFiles([getBusterTemplatesPath(), projectType], { recursive: true });
@@ -63,7 +68,7 @@ export async function run(args: InitArgs): Promise<number> {
     if (!templateFiles.includes(baseFile)) {
       const srcPath = join([getBusterTemplatesPath(), "base", baseFile]);
       const destPath = join([path, baseFile]);
-      console.info(`Writing "${destPath}" from "${srcPath}"...`);
+      logMessage(`Writing "${destPath}" from "${srcPath}"...`);
       await writeTemplateFile(srcPath, destPath, templateVars);
     }
   }
@@ -71,7 +76,7 @@ export async function run(args: InitArgs): Promise<number> {
   for (const templateFile of templateFiles) {
     const srcPath = join([getBusterTemplatesPath(), projectType, templateFile]);
     const destPath = join([path, templateFile]);
-    console.info(`Writing "${destPath}" from "${srcPath}"...`);
+    logMessage(`Writing "${destPath}" from "${srcPath}"...`);
     await writeTemplateFile(srcPath, destPath, templateVars);
   }
 
@@ -88,10 +93,10 @@ async function writeTemplateFile(srcPath: string, destPath: string, vars: Record
     const isBusterFile = split(srcPath).includes(".buster");
 
     if (!isBusterFile) {
-      console.info("  => File already exists. Skipping.");
+      logMessage("  => File already exists. Skipping.");
       return;
     } else {
-      console.info("  => File exists but is managed by buster. Overwriting.");
+      logMessage("  => File exists but is managed by buster. Overwriting.");
     }
   }
 
