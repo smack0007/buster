@@ -1,3 +1,3 @@
 {
-  "extends": "./.buster/.oxlintrc.json"
+  "extends": ["./.buster/.oxlintrc.json"]
 }
