@@ -28,7 +28,6 @@ describe("add", async () => {
           expect(await exists("node_modules")).toBe(true);
           expect(await exists("pnpm-lock.yaml")).toBe(true);
           expect(await exists(join(["node_modules", "is-number"]))).toBe(true);
-          expect(await exists(join(["node_modules", "@buster"]))).toBe(true);
         } finally {
           await exec(["git", "restore", join([projectPath, "package.json"])]);
         }
@@ -53,7 +52,6 @@ describe("add", async () => {
 
           expect(await exists(join([projectPath, "node_modules"]))).toBe(true);
           expect(await exists(join([projectPath, "node_modules", "is-number"]))).toBe(true);
-          expect(await exists(join([projectPath, "node_modules", "@buster"]))).toBe(true);
           expect(await exists(join([projectPath, "pnpm-lock.yaml"]))).toBe(true);
         } finally {
           await exec(["git", "restore", join([projectPath, "package.json"])]);

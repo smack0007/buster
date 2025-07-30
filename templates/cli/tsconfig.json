@@ -4,7 +4,7 @@
   "compilerOptions": {
 		"noEmit": true,
     "allowImportingTsExtensions": true
-  },
+	},
 	
-  "include": ["lib/**/*.ts", "src/**/*.ts", "tests/**/*.ts"]
+  "include": ["**/*.ts"]
 }

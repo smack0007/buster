@@ -26,7 +26,6 @@ describe("install", async () => {
 
         expect(await exists("node_modules")).toBe(true);
         expect(await exists("pnpm-lock.yaml")).toBe(true);
-        expect(await exists(join(["node_modules", "@buster"]))).toBe(true);
       });
     }
   });
@@ -46,7 +45,6 @@ describe("install", async () => {
         expect(result.code).toEqual(0);
 
         expect(await exists(join([projectPath, "node_modules"]))).toBe(true);
-        expect(await exists(join([projectPath, "node_modules", "@buster"]))).toBe(true);
         expect(await exists(join([projectPath, "pnpm-lock.yaml"]))).toBe(true);
       });
     }

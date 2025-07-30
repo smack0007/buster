@@ -15,6 +15,10 @@ export function getBusterExtPath(): string {
   return join([getBusterPath(), "ext"]);
 }
 
+export function getBusterTemplatesPath(): string {
+  return join([getBusterPath(), "templates"]);
+}
+
 export function getBusterTmpPath(): string {
   return join([getBusterPath(), "tmp"]);
 }

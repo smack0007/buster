@@ -1,13 +1,9 @@
 {
-  "name": "hello-world",
+  "name": "${{projectName}}",
   "description": "",
   "version": "0.0.1",
   "type": "module",
   "main": "./src/main.ts",
-  "scripts": {
-    "run": "buster run ./src/main.ts",
-    "run:bob": "buster run ./src/main.ts Bob"
-  },
   "dependencies": {},
   "devDependencies": {
     "@types/node": "24.1.0",

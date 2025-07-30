@@ -1,9 +1,13 @@
 {
-  "name": "todo",
+  "name": "clicker",
   "description": "",
   "version": "0.0.1",
   "type": "module",
   "scripts": {
     "serve": "buster serve ./src"
+  },
+  "devDependencies": {
+    "@tsconfig/node24": "24.0.1",
+    "expect": "30.0.5"
   }
 }

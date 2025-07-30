@@ -1,7 +1,6 @@
 import { parseArgs } from "./lib/args.ts";
 import { getPNPMExe } from "./lib/common.ts";
 import { exec, ExecIOMode } from "./lib/os.ts";
-import { symlinkBusterModule } from "./packageManager.ts";
 
 export interface RemoveArgs {
   dependencies: string[];
@@ -34,10 +33,6 @@ export async function run(args: RemoveArgs): Promise<number> {
     stdout: ExecIOMode.inherit,
     stderr: ExecIOMode.inherit,
   });
-
-  if (result.code === 0) {
-    await symlinkBusterModule(args.directory ?? ".");
-  }
 
   return result.code;
 }

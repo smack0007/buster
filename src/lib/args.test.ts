@@ -17,8 +17,13 @@ const FOO_BAR_CONFIG = {
       type: "number",
       default: 42,
     },
+    enable: {
+      keys: ["--enable", "-e"],
+      type: "boolean",
+      default: false,
+    },
   },
-} satisfies ParseArgsConfig<"values", "foo" | "bar">;
+} satisfies ParseArgsConfig<"values", "foo" | "bar" | "enable">;
 
 const SINGLE_POSITIONAL_CONFIG = {
   positional: {
@@ -32,17 +37,27 @@ describe("args.ts", () => {
   describe("parseArgs", () => {
     it("basic test", () => {
       const args: string[] = ["--foo", "abc", "-b", "42"];
-      expect(parseArgs(args, FOO_BAR_CONFIG)).toEqual({ values: [], foo: "abc", bar: 42 });
+      expect(parseArgs(args, FOO_BAR_CONFIG)).toEqual({ values: [], foo: "abc", bar: 42, enable: false });
     });
 
     it("default args", () => {
       const args: string[] = [];
-      expect(parseArgs(args, FOO_BAR_CONFIG)).toEqual({ values: [], foo: "foo", bar: 42 });
+      expect(parseArgs(args, FOO_BAR_CONFIG)).toEqual({ values: [], foo: "foo", bar: 42, enable: false });
+    });
+
+    it("enable flag long", () => {
+      const args: string[] = ["--enable"];
+      expect(parseArgs(args, FOO_BAR_CONFIG)).toEqual({ values: [], foo: "foo", bar: 42, enable: true });
+    });
+
+    it("enable flag short", () => {
+      const args: string[] = ["-e"];
+      expect(parseArgs(args, FOO_BAR_CONFIG)).toEqual({ values: [], foo: "foo", bar: 42, enable: true });
     });
 
     it("single positional", () => {
       const args: string[] = ["foo"];
-      expect(parseArgs(args, SINGLE_POSITIONAL_CONFIG)).toEqual({ values: "foo", foo: "foo", bar: 42 });
+      expect(parseArgs(args, SINGLE_POSITIONAL_CONFIG)).toEqual({ values: "foo", foo: "foo", bar: 42, enable: false });
     });
   });
 });

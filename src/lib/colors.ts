@@ -1,9 +1,13 @@
-import { styleText } from "node:util";
+import util from "node:util";
 
 export function green(text: string): string {
-  return styleText("green", text);
+  return util.styleText("green", text);
+}
+
+export function toJsonColor(obj: unknown): string {
+  return util.inspect(obj, { compact: false, colors: true });
 }
 
 export function red(text: string): string {
-  return styleText("red", text);
+  return util.styleText("red", text);
 }
