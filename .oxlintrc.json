@@ -1,3 +1,7 @@
 {
-  "extends": "./lib/configs/.oxlintrc.json"
+  "plugins": ["typescript"],
+  "rules": {
+    "@typescript-eslint/explicit-function-return-type": "error",
+    "@typescript-eslint/explicit-member-accessibility": "error"
+  }
 }
