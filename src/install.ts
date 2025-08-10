@@ -4,6 +4,7 @@ import { exec, ExecIOMode } from "./lib/os.ts";
 
 export interface InstallArgs {
   directory?: string;
+  global?: string;
 }
 
 export function parse(args: string[]): InstallArgs {
@@ -16,6 +17,10 @@ export function parse(args: string[]): InstallArgs {
         keys: ["--dir"],
         type: "string",
       },
+      global: {
+        keys: ["--global", "-g"],
+        type: "string",
+      },
     },
   });
 }
@@ -26,6 +31,10 @@ export async function run(args: InstallArgs): Promise<number> {
   let options: string[] = [];
   if (args.directory) {
     options.push("--dir", args.directory);
+  }
+
+  if (args.global) {
+    options.push("--global", args.global);
   }
 
   const result = await exec([pnpmExe, "install", ...options], {
