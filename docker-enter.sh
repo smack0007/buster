@@ -2,7 +2,7 @@
 set -e
 . "$(dirname $(realpath "${BASH_SOURCE[0]}"))/buster.env"
 
-DOCKER_FLAGS="--rm -v $(realpath $1):/app ${DOCKER_FLAGS}"
+DOCKER_FLAGS="--rm -v $(realpath ${1:-.}):/app ${DOCKER_FLAGS}"
 
 if [[ ! "${DOCKER_FLAGS}" == *" -w "* ]]; then
   DOCKER_FLAGS="${DOCKER_FLAGS} -w /app"
