@@ -1,9 +1,5 @@
 #!/bin/bash
-set -eu
-
-buster_calculateHash() {
-  echo "$(md5sum $1 | cut -d " " -f 1)"
-}
+set -e
 
 BUSTER_PATH="$(realpath $(dirname $(realpath "${BASH_SOURCE[0]}"))/..)"
 BUSTER_DIST=${BUSTER_PATH}/dist
@@ -26,7 +22,7 @@ BUSTER_PNPM_IDENTIFIER="pnpm-${BUSTER_PNPM_VERSION}-${BUSTER_PNPM_PLATFORM}"
 BUSTER_PNPM_PATH="${BUSTER_EXT}/${BUSTER_PNPM_IDENTIFIER}"
 BUSTER_PNPM_EXE="${BUSTER_PNPM_PATH}/pnpm"
 
-BUSTER_NODE_MODULES_IDENTIFIER="${BUSTER_NODE_IDENTIFIER}-$(buster_calculateHash "${BUSTER_PATH}/package.json")"
+BUSTER_NODE_MODULES_IDENTIFIER="${BUSTER_NODE_IDENTIFIER}-$(md5sum "${BUSTER_PATH}/package.json" | cut -d " " -f 1)"
 BUSTER_NODE_MODULES_PATH="${BUSTER_PATH}/node_modules"
 
 BUSTER_VERBOSE=${BUSTER_VERBOSE:-0}
