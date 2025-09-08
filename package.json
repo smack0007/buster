@@ -10,7 +10,7 @@
     "vite": "7.0.6"
   },
   "devDependencies": {
-    "@types/node": "24.2.1",
+    "@types/node": "24.3.1",
     "@tsconfig/node24": "24.0.1",
     "expect": "30.0.5"
   }
