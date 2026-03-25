@@ -1,0 +1,24 @@
+#!/bin/bash
+set -eu
+source "$(dirname $(realpath "${BASH_SOURCE[0]}"))/../buster.env"
+
+# Ensure everything is available via the PATH variable.
+PATH="${BUSTER_BIN_PATH}:${BUSTER_NODE_PATH}/bin:${PATH}"
+
+BUSTER_REPLACE_SIGNAL="$(mktemp)"
+
+BUSTER_PATH="${BUSTER_PATH}" \
+BUSTER_NODE_PATH="${BUSTER_NODE_PATH}" \
+BUSTER_REPLACE_SIGNAL="${BUSTER_REPLACE_SIGNAL}" \
+  ${BUSTER_NODE_PATH}/bin/node ${BUSTER_NODE_OPTIONS} "${BUSTER_SRC_PATH}/main.ts" ${@}
+
+# If the file ${BUSTER_REPLACE_SIGNAL} has been written to, then the command
+# written to that file should take over execution. 
+if [ -f "${BUSTER_REPLACE_SIGNAL}" ]; then
+  BUSTER_REPLACEMENT_PROCESS="$(cat "${BUSTER_REPLACE_SIGNAL}")"
+  rm "${BUSTER_REPLACE_SIGNAL}"
+
+BUSTER_PATH="${BUSTER_PATH}" \
+BUSTER_NODE_PATH="${BUSTER_NODE_PATH}" \
+  ${BUSTER_REPLACEMENT_PROCESS}
+fi 
