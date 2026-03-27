@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "module": "esnext",
+    "target": "esnext",
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "typeRoots": [
+      "./ext/@types",
+    ],
+    "types": ["node"],
+    "strict": true,
+  },
+  "include": [
+    "./src/**/*.ts",
+    "./tests/**/*.ts"
+  ],
+}

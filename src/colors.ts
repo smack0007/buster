@@ -1,4 +1,4 @@
-import util from "node:util";
+import * as util from "node:util";
 
 export function green(text: string): string {
   return util.styleText("green", text);

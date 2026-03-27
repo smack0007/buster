@@ -1,0 +1,4 @@
+{
+  "command": "buster run ./assets/hello-world.ts",
+  "stdout": "Hello World!"
+}
