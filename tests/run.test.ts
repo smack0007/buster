@@ -1,6 +1,5 @@
-import { equal } from "node:assert";
 import { chdir } from "node:process";
-import { describe, it } from "node:test";
+import { describe, expect, it } from "buster:test";
 import { runBusterCommand } from "./runBusterCommand.ts";
 
 chdir(import.meta.dirname);
@@ -11,8 +10,8 @@ describe("run", () => {
       "run",
       "./assets/hello-world.ts",
     ]);
-    equal(code, 0);
-    equal(stdout.trim(), "Hello World!");
-    equal(stderr.trim(), "");
+    expect(code).toEqual(0);
+    expect(stdout.trim()).toEqual("Hello World!");
+    expect(stderr.trim()).toEqual("");
   });
 });

@@ -9,8 +9,12 @@
     ],
     "types": ["node"],
     "strict": true,
+    "paths": {
+      "buster:test": ["./lib/test/index.ts"],
+    }
   },
   "include": [
+    "./lib/**/*.ts",
     "./src/**/*.ts",
     "./tests/**/*.ts"
   ],
