@@ -1,11 +1,4 @@
-import {
-  AssertionError,
-  deepStrictEqual,
-  strictEqual,
-  throws,
-} from "node:assert";
-
-export { afterEach, beforeEach, describe, it } from "node:test";
+import * as assert from "node:assert";
 
 function isObject(value: unknown): value is {} {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -22,14 +15,14 @@ class Expect<T> {
 
   public toEqual(other: T, message?: string): void {
     if (this.isObject) {
-      deepStrictEqual(this.value, other, message);
+      assert.deepStrictEqual(this.value, other, message);
     } else {
-      strictEqual(this.value, other, message);
+      assert.strictEqual(this.value, other, message);
     }
   }
 
   public toBeTrue(message?: string): void {
-    strictEqual(
+    assert.strictEqual(
       this.value,
       true,
       message ?? `Expected ${this.value} to be true.`,
@@ -37,7 +30,7 @@ class Expect<T> {
   }
 
   public toBeFalse(message?: string): void {
-    strictEqual(
+    assert.strictEqual(
       this.value,
       false,
       message ?? `Expected ${this.value} to be false.`,
@@ -45,28 +38,35 @@ class Expect<T> {
   }
 }
 
-class ExpectFunction<T extends Function> extends Expect<T> {
-  public constructor(func: T) {
-    super(func);
-  }
-
-  public toThrow(): void {
-    throws(() => this.value(), "Expected function to throw.");
+class ExpectString<T extends string> extends Expect<T> {
+  public includes(
+    searchString: string,
+    position?: number,
+    message?: string,
+  ): void {
+    assert.strictEqual(
+      this.value.includes(searchString, position),
+      true,
+      message,
+    );
   }
 }
 
-export function expect<T extends Function>(func: T): ExpectFunction<T>;
+class ExpectFunction<T extends Function> extends Expect<T> {
+  public toThrow(): void {
+    assert.throws(() => this.value(), "Expected function to throw.");
+  }
+}
+
+export function expect<T extends string>(value: T): ExpectString<T>;
+export function expect<T extends Function>(value: T): ExpectFunction<T>;
 export function expect<T>(value: T): Expect<T>;
 export function expect<T>(value: T): Expect<T> {
-  if (value instanceof Function) {
+  if (typeof value === "string") {
+    return new ExpectString(value);
+  } else if (value instanceof Function) {
     return new ExpectFunction(value);
   } else {
     return new Expect(value);
   }
-}
-
-export function fail(message?: string): never {
-  throw new AssertionError({
-    message: message ?? "Test failed.",
-  });
 }

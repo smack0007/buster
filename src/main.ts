@@ -1,5 +1,6 @@
 import { argv, exit } from "node:process";
 import * as run from "./commands/run.ts";
+import * as test from "./commands/test.ts";
 import { logError } from "./log.ts";
 
 const args = argv.slice(2);
@@ -13,6 +14,7 @@ interface Command {
 
 const commands: Record<string, Command> = {
   run,
+  test,
 };
 
 if (args[0] !== undefined) {

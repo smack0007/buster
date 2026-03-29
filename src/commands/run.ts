@@ -27,7 +27,7 @@ export async function run(args: RunArgs): Promise<number> {
 
   await signalReplaceProcessAndExit([
     nodeExe,
-    ...getNodeOptions(),
+    getNodeOptions(),
     ...args.scriptArgs,
   ]);
 

@@ -3,18 +3,22 @@ import { env, exit } from "node:process";
 import { join } from "node:path";
 import { throwError } from "./utils.ts";
 
+export function getBusterPath(): string {
+  return env["BUSTER_PATH"] ??
+    throwError("BUSTER_PATH was not defined.");
+}
+
 export function getNodePath(): string {
-  return env["BUSTER_NODE_PATH"] ??
-    throwError("BUSTER_NODE_PATH was not defined.");
+  return join(getBusterPath(), "ext", "node");
 }
 
 export function getNodeExe(): string {
   return join(getNodePath(), "bin", "node");
 }
 
-export function getNodeOptions(): string[] {
-  // TODO: Pull this from buster.env
-  return ["--strip-types"];
+export function getNodeOptions(): string {
+  return env["BUSTER_NODE_OPTIONS"] ??
+    throwError("BUSTER_NODE_OPTIONS was not defined.");
 }
 
 export async function signalReplaceProcessAndExit(

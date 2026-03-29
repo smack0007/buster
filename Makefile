@@ -5,4 +5,5 @@ NODE_OPTIONS := --strip-types --import ./src/preload.ts
 
 .PHONY: test
 test:
+	BUSTER_PATH="$(BUSTER_PATH)" $(NODE_EXE) $(NODE_OPTIONS) --test './lib/**/*.test.ts'
 	BUSTER_PATH="$(BUSTER_PATH)" $(NODE_EXE) $(NODE_OPTIONS) --test './tests/**/*.test.ts'

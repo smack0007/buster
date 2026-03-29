@@ -1,4 +1,4 @@
-import { describe, it } from "node:test";
+import { afterEach, beforeEach, describe, it } from "node:test";
 
-export { describe, it };
+export { afterEach, beforeEach, describe, it };
 export * from "./expect.ts";
