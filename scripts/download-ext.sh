@@ -37,10 +37,12 @@ NPM_OPTIONS="--no-save --ignore-scripts"
 ${NPM_EXE} ${NPM_OPTIONS} i \
   @types/node@${BUSTER_TYPES_NODE_VERSION} \
   esbuild@${BUSTER_ESBUILD_VERSION} \
+  koffi@${BUSTER_KOFFI_VERSION} \
   typescript@${BUSTER_TYPESCRIPT_VERSION}
 
 mv ./node_modules/@types "${BUSTER_TYPES_PATH}"
 mv ./node_modules/esbuild "${BUSTER_ESBUILD_PATH}"
+mv ./node_modules/koffi "${BUSTER_KOFFI_PATH}"
 mv ./node_modules/typescript "${BUSTER_TYPESCRIPT_PATH}"
 
 # Move undici-types into @types/node

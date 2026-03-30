@@ -2,18 +2,23 @@
   "compilerOptions": {
     "module": "esnext",
     "target": "esnext",
+    "moduleResolution": "bundler",
     "noEmit": true,
     "allowImportingTsExtensions": true,
+    "erasableSyntaxOnly": true,
     "typeRoots": [
       "./ext/@types",
     ],
     "types": ["node"],
     "strict": true,
     "paths": {
+      "buster:ffi": ["./lib/ffi/index.ts"],
       "buster:test": ["./lib/test/index.ts"],
+      "*": ["./ext/*"]
     }
   },
   "include": [
+    "./examples/**/*.ts",
     "./lib/**/*.ts",
     "./src/**/*.ts",
     "./tests/**/*.ts"

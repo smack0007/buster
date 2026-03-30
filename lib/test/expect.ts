@@ -4,24 +4,48 @@ function isObject(value: unknown): value is {} {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-class Expect<T> {
-  private readonly isObject;
-  protected readonly value: T;
+interface Expect<T> {
+  toEqual(other: T, message?: string): void;
+}
 
-  public constructor(value: T) {
+interface ExpectNullish<T extends null | undefined> extends Expect<T> {
+  toBeDefined(message?: string): void;
+}
+
+interface ExpectBoolean<T extends boolean> extends Expect<T> {
+  toBeTrue(message?: string): void;
+  toBeFalse(message?: string): void;
+}
+
+interface ExpectFunction<T extends Function> extends Expect<T> {
+  toThrow(message?: string): void;
+}
+
+interface ExpectString<T extends string> extends Expect<T> {
+  toInclude(message?: string): void;
+}
+
+class ExpectWrapper<T> {
+  readonly value: T;
+
+  constructor(value: T) {
     this.value = value;
-    this.isObject = isObject(value);
   }
 
-  public toEqual(other: T, message?: string): void {
-    if (this.isObject) {
+  toBeDefined(message?: string): void {
+    assert.notStrictEqual(this.value, null, message);
+    assert.notStrictEqual(this.value, undefined, message);
+  }
+
+  toEqual(other: T, message?: string): void {
+    if (isObject(this.value)) {
       assert.deepStrictEqual(this.value, other, message);
     } else {
       assert.strictEqual(this.value, other, message);
     }
   }
 
-  public toBeTrue(message?: string): void {
+  toBeTrue(message?: string): void {
     assert.strictEqual(
       this.value,
       true,
@@ -29,44 +53,38 @@ class Expect<T> {
     );
   }
 
-  public toBeFalse(message?: string): void {
+  toBeFalse(message?: string): void {
     assert.strictEqual(
       this.value,
       false,
       message ?? `Expected ${this.value} to be false.`,
     );
   }
-}
 
-class ExpectString<T extends string> extends Expect<T> {
-  public includes(
+  toInclude(
     searchString: string,
     position?: number,
     message?: string,
   ): void {
     assert.strictEqual(
-      this.value.includes(searchString, position),
+      (this.value as string).includes(searchString, position),
       true,
       message,
     );
   }
-}
 
-class ExpectFunction<T extends Function> extends Expect<T> {
-  public toThrow(): void {
-    assert.throws(() => this.value(), "Expected function to throw.");
+  toThrow(message?: string): void {
+    assert.throws(() => (this.value as Function)(), message);
   }
 }
 
-export function expect<T extends string>(value: T): ExpectString<T>;
+export function expect<T extends boolean>(value: T): ExpectBoolean<T>;
+export function expect<T extends boolean | null | undefined>(
+  value: T,
+): ExpectBoolean<NonNullable<T>> & ExpectNullish<null | undefined>;
 export function expect<T extends Function>(value: T): ExpectFunction<T>;
+export function expect<T extends string>(value: T): ExpectString<T>;
 export function expect<T>(value: T): Expect<T>;
 export function expect<T>(value: T): Expect<T> {
-  if (typeof value === "string") {
-    return new ExpectString(value);
-  } else if (value instanceof Function) {
-    return new ExpectFunction(value);
-  } else {
-    return new Expect(value);
-  }
+  return new ExpectWrapper<T>(value);
 }
