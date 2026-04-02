@@ -1,4 +1,4 @@
-import koffi from "koffi";
+import koffi from "../../ext/koffi/index.js";
 import {
   FFIError,
   type FFILibrary,

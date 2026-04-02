@@ -1,5 +1,9 @@
 import * as util from "node:util";
 
+export function blue(text: string): string {
+  return util.styleText("blue", text);
+}
+
 export function green(text: string): string {
   return util.styleText("green", text);
 }

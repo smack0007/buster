@@ -1,4 +1,5 @@
 import { argv, exit } from "node:process";
+import * as init from "./commands/init.ts";
 import * as run from "./commands/run.ts";
 import * as test from "./commands/test.ts";
 import { logError } from "./log.ts";
@@ -13,6 +14,7 @@ interface Command {
 }
 
 const commands: Record<string, Command> = {
+  init,
   run,
   test,
 };

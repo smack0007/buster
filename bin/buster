@@ -11,7 +11,7 @@ BUSTER_PATH="${BUSTER_PATH}" \
 BUSTER_NODE_OPTIONS="${BUSTER_NODE_OPTIONS}" \
 BUSTER_REPLACE_SIGNAL="${BUSTER_REPLACE_SIGNAL}" \
 NODE_PATH="${BUSTER_EXT_PATH}" \
-  ${BUSTER_NODE_PATH}/bin/node ${BUSTER_NODE_OPTIONS} "${BUSTER_SRC_PATH}/main.ts" ${@}
+  ${BUSTER_NODE_PATH}/bin/node ${BUSTER_NODE_OPTIONS} "${BUSTER_SRC_PATH}/main.ts" ${@:-}
 
 # If the file ${BUSTER_REPLACE_SIGNAL} has been written to, then the command
 # written to that file should take over execution. 
