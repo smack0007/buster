@@ -2,6 +2,16 @@
 set -eu
 source "$(dirname $(realpath "${BASH_SOURCE[0]}"))/../buster.env"
 
+BUSTER_PATH="$(realpath $(dirname $(realpath "${BASH_SOURCE[0]}"))/..)"
+BUSTER_BIN_PATH="${BUSTER_PATH}/bin"
+BUSTER_EXT_PATH="${BUSTER_PATH}/ext"
+BUSTER_SRC_PATH="${BUSTER_PATH}/src"
+BUSTER_NODE_PATH="${BUSTER_EXT_PATH}/node"
+
+BUSTER_NODE_OPTIONS="--strip-types --import ${BUSTER_SRC_PATH}/preload.ts"
+
+BUSTER_VERBOSE=${BUSTER_VERBOSE:-0}
+
 # Ensure everything is available via the PATH variable.
 PATH="${BUSTER_BIN_PATH}:${BUSTER_NODE_PATH}/bin:${PATH}"
 

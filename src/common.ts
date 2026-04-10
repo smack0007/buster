@@ -8,8 +8,12 @@ export function getBusterPath(): string {
     throwError("BUSTER_PATH was not defined.");
 }
 
+export function getBusterExtPath(): string {
+  return join(getBusterPath(), "ext");
+}
+
 export function getNodePath(): string {
-  return join(getBusterPath(), "ext", "node");
+  return join(getBusterExtPath(), "node");
 }
 
 export function getNodeExe(): string {

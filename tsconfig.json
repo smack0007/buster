@@ -13,7 +13,9 @@
     "strict": true,
     "paths": {
       "buster:ffi": ["./lib/ffi/index.ts"],
+      "buster:jsonc": ["./lib/jsonc/index.ts"],
       "buster:test": ["./lib/test/index.ts"],
+      "buster:webview": ["./lib/webview/index.ts"],
     }
   },
   "include": [

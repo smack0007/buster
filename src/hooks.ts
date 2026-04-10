@@ -22,8 +22,6 @@ export async function resolve(
   if (specifier.startsWith("buster:")) {
     const libName = url.substring("buster:".length);
     url = pathToFileURL(join(BUSTER_PATH, "lib", libName, "index.ts")).href;
-  } else if (specifier == "koffi") {
-    url = pathToFileURL(join(BUSTER_PATH, "ext", "koffi", "index.js")).href;
   }
 
   return next(url, context);

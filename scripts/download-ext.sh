@@ -2,6 +2,18 @@
 set -eu
 source "$(dirname $(realpath "${BASH_SOURCE[0]}"))/../buster.env"
 
+BUSTER_PATH="$(realpath $(dirname $(realpath "${BASH_SOURCE[0]}"))/..)"
+BUSTER_EXT_PATH="${BUSTER_PATH}/ext"
+BUSTER_TMP_PATH="${BUSTER_PATH}/tmp"
+BUSTER_ESBUILD_PATH="${BUSTER_EXT_PATH}/esbuild"
+BUSTER_JSONC_PARSER_PATH="${BUSTER_EXT_PATH}/jsonc-parser"
+BUSTER_KOFFI_PATH="${BUSTER_EXT_PATH}/koffi"
+BUSTER_NODE_PATH="${BUSTER_EXT_PATH}/node"
+BUSTER_TYPES_PATH="${BUSTER_EXT_PATH}/@types"
+BUSTER_TYPESCRIPT_PATH="${BUSTER_EXT_PATH}/typescript"
+
+BUSTER_PLATFORM="$(echo "$(uname -s)-$(uname -m)" | tr '[:upper:]' '[:lower:]' | sed 's/x86_64/x64/')"
+
 if [ -d "${BUSTER_TMP_PATH}" ]; then
   rm -rf "${BUSTER_TMP_PATH}"
 fi
@@ -42,6 +54,7 @@ ${NPM_EXE} ${NPM_OPTIONS} i \
 
 mv ./node_modules/@types "${BUSTER_TYPES_PATH}"
 mv ./node_modules/esbuild "${BUSTER_ESBUILD_PATH}"
+mv ./node_modules/jsonc-parser "${BUSTER_JSONC_PARSER_PATH}"
 mv ./node_modules/koffi "${BUSTER_KOFFI_PATH}"
 mv ./node_modules/typescript "${BUSTER_TYPESCRIPT_PATH}"
 

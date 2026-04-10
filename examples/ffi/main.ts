@@ -1,15 +1,15 @@
-import { dlopen, FFIType } from "buster:ffi";
+import { dlopen, FFITypes } from "buster:ffi";
 
 const libc = dlopen(
   "libc.dylib",
   {
     functions: {
       printf: {
-        returnType: FFIType.int32,
-        parameters: [FFIType.string, FFIType.varadic],
+        returnType: FFITypes.int32,
+        parameters: [FFITypes.string, FFITypes.varadic],
       },
     },
   } as const,
 );
 
-libc.functions.printf("Hello World!\n");
+libc.functions.printf("Hello %s!\n", FFITypes.string, "Bob");
